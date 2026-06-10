@@ -84,7 +84,7 @@ export function useAppState(userId?: string): AppState & AppStateActions {
   const [detailStates, setDetailStates] = useState<Record<string, BookingDetailState>>({});
   const [paymentData,  setPaymentData]  = useState<Record<string, PaymentData>>({});
   const [customTasks,  setCustomTasks]  = useState<CustomTask[]>([]);
-  const [userName, setUserNameState]    = useState(() => localStorage.getItem("userName") || "István");
+  const [userName, setUserNameState]    = useState("");
 
   /* ── Load from Supabase ── */
   const loadAll = useCallback(async () => {
