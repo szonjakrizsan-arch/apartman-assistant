@@ -1,0 +1,74 @@
+/**
+ * useIcalBookings.ts — React hook that fetches and refreshes iCal data.
+ */
+import { useState, useEffect, useCallback } from "react";
+import type { Booking, FutureBooking } from "./mockData";
+import type { FeedConfig } from "./icalFeeds";
+import type { ApartmentRow, FeedRow } from "../hooks/useApartments";
+import { proxy } from "./icalFeeds";
+import { fetchAllBookings, fetchFutureBookings } from "./icalBookings";
+
+export type IcalStatus = "idle" | "loading" | "success" | "error";
+
+export interface IcalState {
+  status:         IcalStatus;
+  bookings:       Booking[];
+  futureBookings: FutureBooking[];
+  errors:         string[];
+  lastFetched:    Date | null;
+  refetch:        () => void;
+}
+
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+
+export function useIcalBookings(
+  apartments: ApartmentRow[],
+  feeds: FeedRow[],
+): IcalState {
+  const [status,         setStatus]        = useState<IcalStatus>("idle");
+  const [bookings,       setBookings]       = useState<Booking[]>([]);
+  const [futureBookings, setFutureBookings] = useState<FutureBooking[]>([]);
+  const [errors,         setErrors]         = useState<string[]>([]);
+  const [lastFetched,    setLastFetched]    = useState<Date | null>(null);
+
+  const load = useCallback(async () => {
+    if (!apartments || !feeds || !apartments.length || !feeds.length) return;
+
+    /* Supabase adatokból FeedConfig[] összerakása */
+    const feedConfigs: FeedConfig[] = feeds.flatMap((f) => {
+      const apt = apartments.find((a) => a.id === f.apartment_id);
+      if (!apt) return [];
+      return [{
+        apartment: apt.name,
+        accent:    apt.accent,
+        source:    f.source as FeedConfig["source"],
+        url:       proxy(f.url),
+      }];
+    });
+
+    setStatus("loading");
+    try {
+      const [{ bookings: b, errors: e }, future] = await Promise.all([
+        fetchAllBookings(feedConfigs),
+        fetchFutureBookings(feedConfigs),
+      ]);
+      setBookings(b);
+      setFutureBookings(future);
+      setErrors(e);
+      setStatus(e.length > 0 && b.length === 0 ? "error" : "success");
+    } catch (err) {
+      setErrors([String(err)]);
+      setStatus("error");
+    }
+    setLastFetched(new Date());
+  }, [apartments, feeds]);
+
+  useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    const id = setInterval(load, REFRESH_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [load]);
+
+  return { status, bookings, futureBookings, errors, lastFetched, refetch: load };
+}
