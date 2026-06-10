@@ -56,7 +56,7 @@ export default function App() {
           )}
           {tab === "invoices" && <InvoicesScreen appState={appState} ical={ical} />}
           {tab === "contacts" && <ContactsScreen appState={appState} ical={ical} />}
-          {tab === "apartments" && <ApartmentsScreen userId={user.id} userName={appState.userName} onNameChange={appState.setUserName} />}
+          {tab === "apartments" && <ApartmentsScreen userId={user.id} />}
         </main>
       </div>
       <BottomNav active={tab} onChange={setTab} />
