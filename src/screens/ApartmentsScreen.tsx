@@ -24,9 +24,12 @@ const SOURCE_OPTIONS = [
 
 interface ApartmentsScreenProps {
   userId: string;
+  userName: string;
+  onNameChange: (name: string) => void;
 }
 
-export function ApartmentsScreen({ userId }: ApartmentsScreenProps) {
+export function ApartmentsScreen({ userId, userName, onNameChange }: ApartmentsScreenProps) {
+  const [nameInput, setNameInput] = useState(userName);
   const { apartments, feeds, loading, addApartment, deleteApartment, addFeed, deleteFeed } = useApartments(userId);
 
   const [newName, setNewName]     = useState("");
@@ -55,7 +58,22 @@ export function ApartmentsScreen({ userId }: ApartmentsScreenProps) {
   return (
     <div className="flex flex-col gap-5 pb-2">
       <SectionHeader title="Apartmanok" subtitle={`${apartments.length} apartman`} />
-
+  {/* Profil kártya */}
+      <div className="card-elevated rounded-2xl p-4 flex flex-col gap-3">
+        <p className="text-[13px] font-semibold text-text-primary">Profil</p>
+        <div className="flex gap-2">
+          <input type="text" value={nameInput} onChange={(e) => setNameInput(e.target.value)}
+            placeholder="Megjelenített név"
+            className="flex-1 rounded-xl border bg-transparent px-3 py-2.5 text-[13px] text-text-primary outline-none input-teal"
+            style={{ borderColor: "rgb(86 176 187 / 0.25)" }} />
+          <button type="button" onClick={() => { if (nameInput.trim()) onNameChange(nameInput.trim()); }}
+            className="pressable rounded-xl px-4 py-2.5 text-[13px] font-semibold"
+            style={{ background: "rgb(86 176 187 / 0.18)", color: "#56b0bb" }}>
+            Mentés
+          </button>
+        </div>
+        <p className="text-[11px] text-text-muted">Ez a név jelenik meg a kezdőlapi köszöntésben.</p>
+      </div>
       {/* Apartman lista */}
       {apartments.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed px-4 py-10 text-center"
