@@ -238,7 +238,12 @@ export function useAppState(userId?: string): AppState & AppStateActions {
     detailStates, paymentData, customTasks, userName,
     getDetail, setDetail, getPayment, setPayment,
     togglePaymentStatus, isPaymentPaid, prevCleaningFor,
-    setUserName: setUserNameState,
+    setUserName: (name: string) => {
+      setUserNameState(name);
+      if (userId) {
+        supabase.from("profiles").upsert({ id: userId, display_name: name }).then(() => {});
+      }
+    },
     addCustomTask, toggleCustomTask, deleteCustomTask,
   };
 }
