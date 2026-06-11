@@ -12,7 +12,8 @@ export function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState("");
   const [success, setSuccess] = useState("");
-
+  const [showPassword, setShowPassword] = useState(false);
+  
   async function handleSubmit() {
     setError(""); setSuccess(""); setLoading(true);
 
@@ -73,10 +74,18 @@ export function AuthScreen() {
             style={{ borderColor: "rgb(86 176 187 / 0.25)" }} />
 
           {mode !== "forgot" && (
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-              placeholder="Jelszó"
-              className="w-full rounded-xl border bg-surface-inset px-4 py-3 text-[13px] text-text-primary outline-none input-teal"
-              style={{ borderColor: "rgb(86 176 187 / 0.25)" }} />
+            <div className="relative">
+              <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
+                placeholder="Jelszó"
+                className="w-full rounded-xl border bg-surface-inset px-4 py-3 pr-12 text-[13px] text-text-primary outline-none input-teal"
+                style={{ borderColor: "rgb(86 176 187 / 0.25)" }} />
+              <button type="button" onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
+                style={{ color: "rgb(143 168 158 / 0.8)" }}
+                aria-label={showPassword ? "Jelszó elrejtése" : "Jelszó megjelenítése"}>
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           )}
 
           {error && (
