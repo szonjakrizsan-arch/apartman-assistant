@@ -44,7 +44,7 @@ const ical = useIcalBookings(apartments, feeds);
 
   /* Bejelentkezve */
   return (
-    <div className="min-h-dvh bg-surface flex">
+    <div key={user.id} className="min-h-dvh bg-surface flex">
       <SideNav active={tab} onChange={setTab} />
       <div className="flex flex-col flex-1 min-w-0">
         <AppHeader tab={tab} />
