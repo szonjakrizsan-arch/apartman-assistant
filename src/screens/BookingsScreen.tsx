@@ -50,7 +50,7 @@ function FilterChip({ config, active, count, onClick }: { config: FilterConfig; 
   const bt = active ? config.activeBadgeText : config.inactiveBadgeText;
   return (
     <button type="button" onClick={onClick} aria-pressed={active}
-      className={`pressable flex shrink-0 items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-soft ring-1 ${bg} ${text} ${ring} ${active ? "shadow-[0_1px_4px_rgb(0_0_0_/0.14)]" : ""}`}>
+      className={`pressable flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[12px] font-medium transition-soft ring-1 ${bg} ${text} ${ring} ${active ? "shadow-[0_1px_4px_rgb(0_0_0_/0.14)]" : ""}`}>
       {config.label}
       <span className={`flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1.5 text-[11px] font-bold leading-none tabular-nums ${bbg} ${bt}`}>{count}</span>
     </button>
