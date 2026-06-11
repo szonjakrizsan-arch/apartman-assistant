@@ -64,7 +64,7 @@ const ical = useIcalBookings(apartments, feeds);
           )}
           {tab === "invoices" && <InvoicesScreen appState={appState} ical={ical} />}
           {tab === "contacts" && <ContactsScreen appState={appState} ical={ical} userId={user.id} />}
-          {tab === "apartments" && <ApartmentsScreen userId={user.id} />}
+          {tab === "apartments" && <ApartmentsScreen userId={user.id} shared={{ apartments, feeds, addApartment, deleteApartment, addFeed, deleteFeed }} />}
         </main>
       </div>
       <BottomNav active={tab} onChange={setTab} />
