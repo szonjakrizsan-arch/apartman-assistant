@@ -54,7 +54,7 @@ const ical = useIcalBookings(apartments, feeds);
         <AppHeader tab={tab} />
         <main className="mx-auto w-full max-w-2xl px-4 pt-5 pb-24 md:pb-8 md:px-8">
           {tab === "home" && (
-            <HomeScreen onNavigate={setTab} appState={appState} ical={ical} />
+            <HomeScreen onNavigate={setTab} appState={appState} ical={ical} hasApartments={apartments.length > 0} />
           )}
           {tab === "bookings" && (
             <BookingsScreen appState={appState} ical={ical} />
