@@ -32,7 +32,12 @@ export function useIcalBookings(
   const [lastFetched,    setLastFetched]    = useState<Date | null>(null);
 
   const load = useCallback(async () => {
-    if (!apartments || !feeds || !apartments.length || !feeds.length) return;
+    if (!apartments || !feeds || !apartments.length || !feeds.length) {
+      setBookings([]);
+      setFutureBookings([]);
+      setErrors([]);
+      return;
+    }
 
     /* Supabase adatokból FeedConfig[] összerakása */
     const feedConfigs: FeedConfig[] = feeds.flatMap((f) => {
