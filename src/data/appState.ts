@@ -88,6 +88,10 @@ export function useAppState(userId?: string): AppState & AppStateActions {
 
   /* ── Load from Supabase ── */
   const loadAll = useCallback(async () => {
+    setPaymentData({});
+    setDetailStates({});
+    setCustomTasks([]);
+    setUserNameState("");
     if (!userId) return;
 
     const [{ data: payments }, { data: details }, { data: tasks }] = await Promise.all([
