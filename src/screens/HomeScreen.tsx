@@ -10,9 +10,9 @@ interface HomeScreenProps {
   onNavigate: (tab: TabId) => void;
   appState: AppState & AppStateActions;
   ical: IcalState;
+  hasApartments: boolean;
 }
-
-export function HomeScreen({ onNavigate, appState, ical }: HomeScreenProps) {
+export function HomeScreen({ onNavigate, appState, ical, hasApartments }: HomeScreenProps) {
   const { isPaymentPaid, togglePaymentStatus, userName } = appState;
 
   const taskCount = ical.bookings.filter((b) => b.status === "departing").length;
@@ -93,6 +93,36 @@ export function HomeScreen({ onNavigate, appState, ical }: HomeScreenProps) {
       icon: "departures" as const,
     },
   ];
+
+  if (!hasApartments) {
+    return (
+      <div className="flex flex-col gap-6 pb-2">
+        <TodayHero ical={ical} userName={userName} />
+        <section className="card-elevated rounded-2xl px-5 py-8 text-center flex flex-col items-center gap-3">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl"
+            style={{ background: "rgb(99 190 162 / 0.12)", outline: "1px solid rgb(99 190 162 / 0.22)" }}>
+            <span className="text-[26px]" aria-hidden>🏠</span>
+          </span>
+          <h2 className="text-[17px] font-bold text-text-primary">
+            Üdv az Apartman Assistantban!
+          </h2>
+          <p className="text-[13px] text-text-secondary max-w-xs leading-relaxed">
+            Kezdésként add hozzá az első apartmanod, és kösd hozzá a naptáradat
+            (Szállás.hu, Airbnb, Booking.com). A foglalásaid ezután automatikusan megjelennek itt.
+          </p>
+          <button type="button" onClick={() => onNavigate("apartments")}
+            className="pressable mt-2 rounded-xl px-6 py-3 text-[13px] font-semibold"
+            style={{ background: "rgb(86 176 187 / 0.20)", color: "#56b0bb", outline: "1px solid rgb(86 176 187 / 0.30)" }}>
+            Első apartman hozzáadása →
+          </button>
+          <p className="text-[11px] text-text-muted max-w-xs mt-1">
+            Az iCal naptárlinket a foglalási oldal beállításaiban találod
+            („Naptár szinkronizálás" vagy „iCal export" néven).
+          </p>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6 pb-2">
