@@ -22,12 +22,22 @@ const SOURCE_OPTIONS = [
   { value: "expedia",     label: "Expedia" },
 ];
 
+import type { ApartmentRow, FeedRow } from "../hooks/useApartments";
+
 interface ApartmentsScreenProps {
   userId: string;
+  shared: {
+    apartments: ApartmentRow[];
+    feeds: FeedRow[];
+    addApartment: (name: string, accent: ApartmentAccent) => Promise<void>;
+    deleteApartment: (id: string) => Promise<void>;
+    addFeed: (apartmentId: string, source: string, url: string) => Promise<void>;
+    deleteFeed: (id: string) => Promise<void>;
+  };
 }
-
-export function ApartmentsScreen({ userId }: ApartmentsScreenProps) {
-  const { apartments, feeds, loading, addApartment, deleteApartment, addFeed, deleteFeed } = useApartments(userId);
+export function ApartmentsScreen({ userId, shared }: ApartmentsScreenProps) {
+  const { apartments, feeds, addApartment, deleteApartment, addFeed, deleteFeed } = shared;
+  const loading = false;
 
   const [newName, setNewName]     = useState("");
   const [newAccent, setNewAccent] = useState<ApartmentAccent>("coral");
