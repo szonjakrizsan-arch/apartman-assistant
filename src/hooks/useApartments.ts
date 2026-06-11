@@ -20,7 +20,9 @@ export function useApartments(userId: string | undefined) {
   const [feeds, setFeeds]           = useState<FeedRow[]>([]);
   const [loading, setLoading]       = useState(true);
 
-  async function load() {
+async function load() {
+    setApartments([]);
+    setFeeds([]);
     if (!userId) return;
     setLoading(true);
  
