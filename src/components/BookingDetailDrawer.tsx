@@ -240,10 +240,6 @@ export function BookingDetailDrawer({
     if (booking) { setNoteOpen(detail.note.length > 0); setContactEditMode(false); }
   }, [booking?.id]);
 
-  useEffect(() => {
-    if (noteOpen && noteRef.current) setTimeout(() => noteRef.current?.focus(), 120);
-  }, [noteOpen]);
-
   function handleBackdrop(e: React.MouseEvent) { if (e.target === e.currentTarget) onClose(); }
 
   useEffect(() => {
@@ -252,6 +248,17 @@ export function BookingDetailDrawer({
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
+  useEffect(() => {
+    if (!booking) return;
+    window.history.pushState({ drawer: true }, "");
+    function onPop() { onClose(); }
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      if (window.history.state?.drawer) window.history.back();
+    };
+  }, [booking?.id]);
+  
   if (!booking) return null;
 
   const accent = accentStyles[booking.accent];
@@ -628,7 +635,7 @@ export function BookingDetailDrawer({
               {!noteOpen ? (
                 <button
                   type="button"
-                  onClick={() => setNoteOpen(true)}
+                  onClick={() => { setNoteOpen(true); setTimeout(() => noteRef.current?.focus(), 120); }}
                   className="pressable flex w-full items-center gap-2.5 rounded-xl border border-dashed px-4 py-3 transition-soft"
                   style={{ borderColor: CORAL.ring, background: CORAL.bg, color: CORAL.text, boxShadow: CORAL.glow }}
                 >
