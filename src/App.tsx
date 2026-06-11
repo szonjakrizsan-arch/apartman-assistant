@@ -8,6 +8,7 @@ import { TasksScreen }    from "./screens/TasksScreen";
 import { InvoicesScreen } from "./screens/InvoicesScreen";
 import { ContactsScreen } from "./screens/ContactsScreen";
 import { AuthScreen }     from "./screens/AuthScreen";
+import { ResetPasswordScreen } from "./screens/ResetPasswordScreen";
 import { useAppState }    from "./data/appState";
 import { useIcalBookings } from "./data/useIcalBookings";
 import { useAuth }        from "./hooks/useAuth";
@@ -18,8 +19,7 @@ import { ApartmentsScreen } from "./screens/ApartmentsScreen";
 export default function App() {
   const [tab, setTab] = useState<TabId>("home");
 
-
-const { user, loading } = useAuth();
+  const { user, loading, passwordRecovery, clearRecovery } = useAuth();
   const appState = useAppState(user?.id);
 const { apartments, feeds } = useApartments(user?.id);
 const ical = useIcalBookings(apartments, feeds);
@@ -37,6 +37,10 @@ const ical = useIcalBookings(apartments, feeds);
     );
   }
 
+  /* Jelszó visszaállítás folyamatban */
+  if (passwordRecovery) {
+    return <ResetPasswordScreen onDone={clearRecovery} />;
+  }
   /* Nincs bejelentkezve */
   if (!user) {
     return <AuthScreen />;
