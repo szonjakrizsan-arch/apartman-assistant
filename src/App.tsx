@@ -59,7 +59,7 @@ const ical = useIcalBookings(apartments, feeds);
             <TasksScreen appState={appState} ical={ical} />
           )}
           {tab === "invoices" && <InvoicesScreen appState={appState} ical={ical} />}
-          {tab === "contacts" && <ContactsScreen appState={appState} ical={ical} />}
+          {tab === "contacts" && <ContactsScreen appState={appState} ical={ical} userId={user.id} />}
           {tab === "apartments" && <ApartmentsScreen userId={user.id} />}
         </main>
       </div>
