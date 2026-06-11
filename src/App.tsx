@@ -21,7 +21,7 @@ export default function App() {
 
   const { user, loading, passwordRecovery, clearRecovery } = useAuth();
   const appState = useAppState(user?.id);
-const { apartments, feeds } = useApartments(user?.id);
+const { apartments, feeds, addApartment, deleteApartment, addFeed, deleteFeed } = useApartments(user?.id);
 const ical = useIcalBookings(apartments, feeds);
 
   useEffect(() => {
