@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
-import { Home } from "lucide-react";
+import { Home, Eye, EyeOff } from "lucide-react";
 
 type AuthMode = "login" | "register" | "forgot";
 
