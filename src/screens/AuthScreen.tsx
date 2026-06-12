@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
 import { Home, Eye, EyeOff } from "lucide-react";
+import { LegalScreen } from "./LegalScreen";
+import type { LegalDoc } from "./LegalScreen";
 
 type AuthMode = "login" | "register" | "forgot";
 
@@ -13,7 +15,9 @@ export function AuthScreen() {
   const [error, setError]     = useState("");
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  
+  const [legalDoc, setLegalDoc] = useState<LegalDoc | null>(null);
+  const [accepted, setAccepted] = useState(false);
+
   async function handleSubmit() {
     setError(""); setSuccess(""); setLoading(true);
 
@@ -23,6 +27,7 @@ export function AuthScreen() {
 
     } else if (mode === "register") {
       if (!name.trim()) { setError("Kérjük adja meg a nevét."); setLoading(false); return; }
+      if (!accepted) { setError("A regisztrációhoz el kell fogadnod a feltételeket."); setLoading(false); return; }
       const { error } = await supabase.auth.signUp({
         email, password,
         options: { data: { display_name: name } }
@@ -37,6 +42,10 @@ export function AuthScreen() {
     }
 
     setLoading(false);
+  }
+
+  if (legalDoc) {
+    return <LegalScreen doc={legalDoc} onBack={() => setLegalDoc(null)} />;
   }
 
   return (
@@ -88,6 +97,21 @@ export function AuthScreen() {
             </div>
           )}
 
+          {mode === "register" && (
+            <label className="flex items-start gap-2.5 cursor-pointer">
+              <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[#56b0bb]" />
+              <span className="text-[12px] leading-relaxed text-text-secondary">
+                Elolvastam és elfogadom az{" "}
+                <button type="button" onClick={() => setLegalDoc("terms")}
+                  className="underline" style={{ color: "#56b0bb" }}>ÁSZF-et</button>
+                {" "}és az{" "}
+                <button type="button" onClick={() => setLegalDoc("privacy")}
+                  className="underline" style={{ color: "#56b0bb" }}>Adatkezelési tájékoztatót</button>.
+              </span>
+            </label>
+          )}
+
           {error && (
             <p className="text-[12px] rounded-lg px-3 py-2" style={{ background: "rgb(207 102 85 / 0.12)", color: "#cf6655" }}>
               {error}
@@ -126,6 +150,18 @@ export function AuthScreen() {
               </button>
             )}
           </div>
+        </div>
+
+        {/* Jogi linksor */}
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <button type="button" onClick={() => setLegalDoc("terms")}
+            className="text-[11px] text-text-muted hover:text-text-secondary transition-soft">ÁSZF</button>
+          <span className="text-[11px] text-text-muted" aria-hidden>·</span>
+          <button type="button" onClick={() => setLegalDoc("privacy")}
+            className="text-[11px] text-text-muted hover:text-text-secondary transition-soft">Adatkezelés</button>
+          <span className="text-[11px] text-text-muted" aria-hidden>·</span>
+          <button type="button" onClick={() => setLegalDoc("contact")}
+            className="text-[11px] text-text-muted hover:text-text-secondary transition-soft">Impresszum</button>
         </div>
       </div>
     </div>
