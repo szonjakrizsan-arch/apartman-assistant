@@ -7,7 +7,7 @@ import {
 import type { Booking } from "../data/mockData";
 import { accentStyles, sourceStyles } from "../lib/theme";
 import type { PaymentData, PaymentMethod } from "../data/appState";
-import { methodLabel } from "../data/appState";
+import { methodLabel, parseAmount, remainingAmount, formatFt } from "../data/appState";
 
 
 /* ─── Design tokens ─────────────────────────────────────────────── */
@@ -413,20 +413,48 @@ export function BookingDetailDrawer({
                 style={{ background: "#1a2220", border: `1px solid ${TEAL.border}` }}
               >
                 {/* Amount */}
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: T.secondary }}>
-                    Összeg
-                  </span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={payment.amount}
-                    onChange={(e) => onPaymentChange({ ...payment, amount: e.target.value })}
-                    placeholder="pl. 82 000 Ft"
-                    className="w-full rounded-lg border px-3 py-2 text-[13px] bg-[#1a2220] input-teal transition-soft focus:outline-none"
-                    style={{ color: T.primary, borderColor: TEAL.border }}
-                  />
-                </label>
+                <div className="flex gap-3">
+                  <label className="flex flex-1 flex-col gap-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: T.secondary }}>
+                      Teljes összeg
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={payment.amount}
+                      onChange={(e) => onPaymentChange({ ...payment, amount: e.target.value })}
+                      placeholder="pl. 30 000"
+                      className="w-full rounded-lg border px-3 py-2 text-[13px] bg-[#1a2220] input-teal transition-soft focus:outline-none"
+                      style={{ color: T.primary, borderColor: TEAL.border }}
+                    />
+                  </label>
+                  <label className="flex flex-1 flex-col gap-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: T.secondary }}>
+                      Előleg / foglaló
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={payment.deposit}
+                      onChange={(e) => onPaymentChange({ ...payment, deposit: e.target.value })}
+                      placeholder="pl. 10 000"
+                      className="w-full rounded-lg border px-3 py-2 text-[13px] bg-[#1a2220] input-teal transition-soft focus:outline-none"
+                      style={{ color: T.primary, borderColor: TEAL.border }}
+                    />
+                  </label>
+                </div>
+
+                {parseAmount(payment.deposit) > 0 && parseAmount(payment.amount) > 0 && (
+                  <div className="flex items-center justify-between rounded-lg px-3 py-2"
+                    style={{ background: "rgb(217 171 78 / 0.10)", outline: "1px solid rgb(217 171 78 / 0.22)" }}>
+                    <span className="text-[12px] font-medium" style={{ color: "#ddb055" }}>
+                      Még fizetendő
+                    </span>
+                    <span className="text-[14px] font-bold" style={{ color: "#ddb055" }}>
+                      {formatFt(remainingAmount(payment))}
+                    </span>
+                  </div>
+                )}
 
                 {/* Method pills */}
                 <div className="flex flex-col gap-1.5">
