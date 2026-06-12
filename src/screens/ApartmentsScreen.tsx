@@ -3,6 +3,8 @@ import { Plus, Trash2, Link, ChevronDown, ChevronUp } from "lucide-react";
 import { SectionHeader } from "../components/SectionHeader";
 import { useApartments } from "../hooks/useApartments";
 import type { ApartmentAccent } from "../data/mockData";
+import { LegalScreen } from "./LegalScreen";
+import type { LegalDoc } from "./LegalScreen";
 
 const ACCENT_OPTIONS: { value: ApartmentAccent; label: string; color: string }[] = [
   { value: "coral",    label: "Korall",   color: "#dc8460" },
@@ -47,6 +49,7 @@ export function ApartmentsScreen({ userId, shared }: ApartmentsScreenProps) {
   const [newSource, setNewSource] = useState("airbnb");
   const [newUrl, setNewUrl]       = useState("");
   const [addingFeedFor, setAddingFeedFor] = useState<string | null>(null);
+  const [legalDoc, setLegalDoc] = useState<LegalDoc | null>(null);
 
   async function handleAddApartment() {
     if (!newName.trim()) return;
@@ -61,6 +64,7 @@ export function ApartmentsScreen({ userId, shared }: ApartmentsScreenProps) {
   }
 
   if (loading) return <p className="text-text-muted text-[13px]">Betöltés...</p>;
+  if (legalDoc) return <LegalScreen doc={legalDoc} onBack={() => setLegalDoc(null)} />;
 
   return (
     <div className="flex flex-col gap-5 pb-2">
@@ -212,6 +216,18 @@ export function ApartmentsScreen({ userId, shared }: ApartmentsScreenProps) {
           <span className="text-[13px] font-medium">Új apartman hozzáadása</span>
         </button>
       )}
+
+      {/* Jogi linksor */}
+      <div className="mt-4 flex items-center justify-center gap-3 pb-2">
+        <button type="button" onClick={() => setLegalDoc("terms")}
+          className="text-[11px] text-text-muted hover:text-text-secondary transition-soft">ÁSZF</button>
+        <span className="text-[11px] text-text-muted" aria-hidden>·</span>
+        <button type="button" onClick={() => setLegalDoc("privacy")}
+          className="text-[11px] text-text-muted hover:text-text-secondary transition-soft">Adatkezelés</button>
+        <span className="text-[11px] text-text-muted" aria-hidden>·</span>
+        <button type="button" onClick={() => setLegalDoc("contact")}
+          className="text-[11px] text-text-muted hover:text-text-secondary transition-soft">Impresszum</button>
+      </div>
     </div>
   );
 }
