@@ -1,5 +1,9 @@
 /**
  * useIcalBookings.ts — React hook that fetches and refreshes iCal data.
+ *
+ * Az "first checkin" mechanizmus: a Szállás.hu naponta levágja a
+ * múltbeli napokat a feedből, ezért az először látott érkezési
+ * dátumot Supabase-be mentjük (booking_starts), és mindig azt használjuk.
  */
 import { useState, useEffect, useCallback } from "react";
 import type { Booking, FutureBooking } from "./mockData";
@@ -7,6 +11,7 @@ import type { FeedConfig } from "./icalFeeds";
 import type { ApartmentRow, FeedRow } from "../hooks/useApartments";
 import { proxy } from "./icalFeeds";
 import { fetchAllBookings, fetchFutureBookings } from "./icalBookings";
+import { supabase } from "../supabaseClient";
 
 export type IcalStatus = "idle" | "loading" | "success" | "error";
 
@@ -24,6 +29,7 @@ const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 export function useIcalBookings(
   apartments: ApartmentRow[],
   feeds: FeedRow[],
+  userId?: string,
 ): IcalState {
   const [status,         setStatus]        = useState<IcalStatus>("idle");
   const [bookings,       setBookings]       = useState<Booking[]>([]);
@@ -53,10 +59,42 @@ export function useIcalBookings(
 
     setStatus("loading");
     try {
+      /* 1. Ismert első érkezési dátumok betöltése */
+      let firstCheckins: Record<string, string> = {};
+      if (userId) {
+        const { data } = await supabase
+          .from("booking_starts")
+          .select("booking_key, first_checkin")
+          .eq("user_id", userId);
+        for (const row of data ?? []) {
+          firstCheckins[row.booking_key] = row.first_checkin;
+        }
+      }
+
+      /* 2. Feed-ek letöltése a már ismert kezdetekkel */
       const [{ bookings: b, errors: e }, future] = await Promise.all([
-        fetchAllBookings(feedConfigs),
+        fetchAllBookings(feedConfigs, firstCheckins),
         fetchFutureBookings(feedConfigs),
       ]);
+
+      /* 3. Új foglalások első érkezési dátumának mentése */
+      if (userId) {
+        const newOnes = b.filter((bk) => {
+          const key = (bk as any)._stableKey as string | undefined;
+          return key && !(key in firstCheckins) && bk._checkinRaw;
+        });
+        if (newOnes.length > 0) {
+          await supabase.from("booking_starts").upsert(
+            newOnes.map((bk) => ({
+              user_id:       userId,
+              booking_key:   (bk as any)._stableKey,
+              first_checkin: bk._checkinRaw!,
+            })),
+            { onConflict: "user_id,booking_key", ignoreDuplicates: true },
+          );
+        }
+      }
+
       setBookings(b);
       setFutureBookings(future);
       setErrors(e);
@@ -66,7 +104,7 @@ export function useIcalBookings(
       setStatus("error");
     }
     setLastFetched(new Date());
-  }, [apartments, feeds]);
+  }, [apartments, feeds, userId]);
 
   useEffect(() => { load(); }, [load]);
 
