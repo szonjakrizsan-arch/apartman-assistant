@@ -2,6 +2,11 @@
  * icalBookings.ts — normalize raw iCal events into the app's Booking shape.
  *
  * READ-ONLY. No external writes. No OTA sync.
+ *
+ * Megjegyzés: a Szállás.hu feed naponta "levágja" a múltbeli napokat
+ * (a DTSTART előre csúszik), ezért stabil kulcsot használunk
+ * (apartman + távozás + forrás), és az először látott érkezési
+ * dátumot vesszük figyelembe (firstCheckins).
  */
 
 import type { Booking, BookingStatus, BookingSource } from "./mockData";
@@ -35,8 +40,14 @@ function normalizeEvent(
   dtend: string,
   summary: string,
   today: Date,
+  firstCheckins: Record<string, string>,
 ): Booking | null {
-  const checkin  = parseIcalDate(dtstart);
+  /* Stabil kulcs: nem változik akkor sem, ha a feed levágja a múltat */
+  const stableKey = `${feed.apartment}::${dtend}::${feed.source}`;
+  /* Az először látott érkezési dátum számít, nem a feed mai állapota */
+  const effectiveStart = firstCheckins[stableKey] ?? dtstart;
+
+  const checkin  = parseIcalDate(effectiveStart);
   const checkout = parseIcalDate(dtend);
   const nights   = daysBetween(checkin, checkout);
 
@@ -51,7 +62,7 @@ function normalizeEvent(
   const status = deriveStatus(checkin, checkout, today);
 
   return {
-    id:               `ical-${uid}`,
+    id:               `ical-${stableKey}`,
     apartment:        feed.apartment,
     accent:           feed.accent,
     status,
@@ -64,14 +75,18 @@ function normalizeEvent(
     paymentStatus:    "pending" as const,
     _uid:          uid,
     _summary:      summary,
-    _checkinRaw:   dtstart,
+    _checkinRaw:   effectiveStart,
     _checkoutRaw:  dtend,
     _isActiveRaw:  isActive,
-  };
+    _stableKey:    stableKey,
+  } as Booking;
 }
 
 /* ── Fetch + parse one feed (browser only) ───────────────────────── */
-export async function fetchFeed(feed: FeedConfig): Promise<Booking[]> {
+export async function fetchFeed(
+  feed: FeedConfig,
+  firstCheckins: Record<string, string>,
+): Promise<Booking[]> {
   const today = todayUTC();
   try {
     const res = await fetch(feed.url, {
@@ -83,7 +98,7 @@ export async function fetchFeed(feed: FeedConfig): Promise<Booking[]> {
     const events = parseIcal(text);
 
     return events
-      .map((e) => normalizeEvent(feed, e.uid, e.dtstart, e.dtend, e.summary ?? "", today))
+      .map((e) => normalizeEvent(feed, e.uid, e.dtstart, e.dtend, e.summary ?? "", today, firstCheckins))
       .filter((b): b is Booking => b !== null);
   } catch (err) {
     console.warn(`[iCal] Failed to fetch ${feed.apartment} (${feed.source}):`, err);
@@ -92,12 +107,15 @@ export async function fetchFeed(feed: FeedConfig): Promise<Booking[]> {
 }
 
 /* ── Fetch all feeds, merge, deduplicate ─────────────────────────── */
-export async function fetchAllBookings(feeds: FeedConfig[]): Promise<{
+export async function fetchAllBookings(
+  feeds: FeedConfig[],
+  firstCheckins: Record<string, string> = {},
+): Promise<{
   bookings: Booking[];
   errors:   string[];
 }> {
   const results = await Promise.allSettled(
-    feeds.map((f) => fetchFeed(f)),
+    feeds.map((f) => fetchFeed(f, firstCheckins)),
   );
 
   const bookings: Booking[] = [];
