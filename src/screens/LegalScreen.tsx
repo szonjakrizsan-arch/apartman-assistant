@@ -89,7 +89,7 @@ Hatályos: 2026. június
 `,
   },
   contact: {
-    title: "Kapcsolat",
+    title: "Impresszum és kapcsolat",
     body: `
 Üzemeltető: dr. Krizsán Szonja Katalin
 Település: Torony
