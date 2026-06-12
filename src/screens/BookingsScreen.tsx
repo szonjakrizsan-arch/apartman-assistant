@@ -242,7 +242,7 @@ export function BookingsScreen({ appState, ical }: BookingsScreenProps) {
                 <ul className="flex flex-col">
                   {visibleFuture.map((booking, idx) => (
                     <li key={booking.id} style={idx > 0 ? { borderTop: "1px solid rgba(186,154,112,0.18)" } : undefined}>
-                      <FutureBookingRow booking={booking} />
+                      <FutureBookingRow booking={booking} onOpen={() => setOpenBooking(booking as any)} />
                     </li>
                   ))}
                 </ul>
@@ -265,7 +265,7 @@ export function BookingsScreen({ appState, ical }: BookingsScreenProps) {
       {/* ── Detail drawer ── */}
       {openBooking && (
         <BookingDetailDrawer
-          booking={openBooking}
+          booking={{ status: "staying", isTodayArrival: false, isTodayDeparture: false, departure: "", ...openBooking } as any}
           onClose={() => setOpenBooking(null)}
           payment={getPayment(openBooking.id)}
           onPaymentChange={(next) => setPayment(openBooking.id, next)}
