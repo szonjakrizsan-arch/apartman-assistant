@@ -4,6 +4,7 @@ import { accentStyles, sourceStyles } from "../lib/theme";
 
 interface FutureBookingRowProps {
   booking: FutureBooking;
+  onOpen?: () => void;
 }
 
 /*
@@ -16,7 +17,7 @@ interface FutureBookingRowProps {
  * - Same accent colour system as BookingCard — consistent apartment identity
  * - No payment info (irrelevant for future planning context)
  */
-export function FutureBookingRow({ booking }: FutureBookingRowProps) {
+export function FutureBookingRow({ booking, onOpen }: FutureBookingRowProps) {
   const accent = accentStyles[booking.accent];
   const source = sourceStyles[booking.source];
 
@@ -25,7 +26,8 @@ export function FutureBookingRow({ booking }: FutureBookingRowProps) {
   const avatarLabel = booking.apartment.slice(0, 2).toUpperCase();
 
   return (
-    <article className="pressable flex items-center gap-2.5 bg-surface-card/30 px-3 py-2.5 transition-soft">
+    <article onClick={onOpen} role="button" tabIndex={0}
+      className="pressable flex w-full cursor-pointer items-center gap-2.5 bg-surface-card/30 px-3 py-2.5 text-left transition-soft">
       {/* Apartment colour avatar — smaller in secondary section */}
       <span
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-[11px] font-bold text-white/85 ${accent.avatar}`}
