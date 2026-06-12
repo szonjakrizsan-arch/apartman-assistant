@@ -167,7 +167,7 @@ export async function fetchFutureBookings(feeds: FeedConfig[]): Promise<import("
       seen.add(key);
 
       future.push({
-        id:           `future-${e.uid}`,
+        id:           `ical-${feed.apartment}::${e.dtend}::${feed.source}`,
         apartment:    feed.apartment,
         accent:       feed.accent,
         arrival:      formatHu(checkin),
