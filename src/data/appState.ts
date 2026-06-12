@@ -9,12 +9,29 @@ export type PaymentStatus = "pending" | "paid";
 
 export interface PaymentData {
   amount: string;
+  deposit: string;
   method: PaymentMethod;
   status: PaymentStatus;
 }
 
 export function makeEmptyPayment(): PaymentData {
-  return { amount: "", method: "transfer", status: "pending" };
+  return { amount: "", deposit: "", method: "transfer", status: "pending" };
+}
+
+/** "30 000 Ft" / "30000" → 30000 (szám). Hibás bemenetre 0. */
+export function parseAmount(s: string): number {
+  const digits = (s || "").replace(/[^\d]/g, "");
+  return digits ? parseInt(digits, 10) : 0;
+}
+
+/** Hátralék = teljes összeg − előleg (nem megy 0 alá). */
+export function remainingAmount(p: PaymentData): number {
+  return Math.max(0, parseAmount(p.amount) - parseAmount(p.deposit));
+}
+
+/** Szám → "20 000 Ft" formátum. */
+export function formatFt(n: number): string {
+  return n.toLocaleString("hu-HU") + " Ft";
 }
 
 export type CustomTaskRecurrence =
@@ -103,7 +120,7 @@ export function useAppState(userId?: string): AppState & AppStateActions {
     if (payments) {
       const map: Record<string, PaymentData> = {};
       for (const p of payments) {
-        map[p.booking_id] = { amount: p.amount ?? "", method: p.method ?? "transfer", status: p.status ?? "pending" };
+        map[p.booking_id] = { amount: p.amount ?? "", deposit: p.deposit ?? "", method: p.method ?? "transfer", status: p.status ?? "pending" };
       }
       setPaymentData(map);
     }
@@ -182,6 +199,7 @@ export function useAppState(userId?: string): AppState & AppStateActions {
       user_id:    userId,
       booking_id: id,
       amount:     next.amount,
+      deposit:    next.deposit,
       method:     next.method,
       status:     next.status,
     }, { onConflict: "user_id,booking_id" });
