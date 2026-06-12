@@ -1,6 +1,6 @@
 {
   "name": "Apartman Assistant",
-  "short_name": "Apartman",
+  "short_name": "Apartman Assistant",
   "description": "Apartmankezelő rendszer vendéglátóknak",
   "start_url": "/",
   "display": "standalone",
