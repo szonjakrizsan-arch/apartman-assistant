@@ -22,7 +22,7 @@ export default function App() {
   const { user, loading, passwordRecovery, clearRecovery } = useAuth();
   const appState = useAppState(user?.id);
 const { apartments, feeds, addApartment, deleteApartment, addFeed, deleteFeed } = useApartments(user?.id);
-const ical = useIcalBookings(apartments, feeds);
+const ical = useIcalBookings(apartments, feeds, user?.id);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
