@@ -1,7 +1,7 @@
 import { Receipt, AlertCircle, CheckCircle2, Banknote } from "lucide-react";
 import { SectionHeader } from "../components/SectionHeader";
 import type { AppState, AppStateActions } from "../data/appState";
-import { deriveInvoices, methodLabel } from "../data/appState";
+import { deriveInvoices, methodLabel, parseAmount, formatFt } from "../data/appState";
 import type { IcalState } from "../data/useIcalBookings";
 
 interface InvoicesScreenProps {
@@ -113,6 +113,11 @@ export function InvoicesScreen({ appState, ical }: InvoicesScreenProps) {
                       <p className="text-[20px] font-bold" style={{ color: "#7dd4dd" }}>
                         {inv.amount}
                       </p>
+                      {parseAmount(inv.deposit) > 0 && inv.displayStatus !== "paid" && (
+                        <p className="mt-1 text-[11px]" style={{ color: "#ddb055" }}>
+                          Előleg: {inv.deposit} · Még fizetendő: <span className="font-bold">{formatFt(inv.remaining)}</span>
+                        </p>
+                      )}
                     </div>
                     {inv.displayStatus === "overdue" && (
                       <span className="flex items-center gap-1 text-[11px] font-medium" style={{ color: "#e08060" }}>
