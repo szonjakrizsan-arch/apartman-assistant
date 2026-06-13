@@ -82,6 +82,7 @@ export function ContactsScreen({ appState, ical, userId }: ContactsScreenProps) 
       arrival:   booking.arrival,
       departure: `${booking.nights} éj`,
       apartment: booking.apartment,
+      year:      booking._checkinRaw ? booking._checkinRaw.slice(0, 4) : "",
     });
   }
 
