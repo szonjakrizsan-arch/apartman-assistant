@@ -67,12 +67,19 @@ Az adatok kezelése a szolgáltatás nyújtásához szükséges
 döntése; ezen adatok tekintetében a felhasználó adatkezelőnek,
 a szolgáltatás technikai adatfeldolgozónak minősül.
 
-4. Adattárolás
+4. Adattárolás és adatfeldolgozók
 
-Az adatok az Európai Unión belüli szervereken, a Supabase
-adatbázis-szolgáltatónál tárolódnak, titkosított kapcsolaton
-keresztül. Az adatokhoz kizárólag a felhasználó fér hozzá
-(sorszintű hozzáférés-védelem).
+Az adatok titkosított kapcsolaton keresztül tárolódnak. Az
+adatokhoz kizárólag a felhasználó fér hozzá (sorszintű
+hozzáférés-védelem). Az adatkezelő az alábbi adatfeldolgozókat
+veszi igénybe:
+
+- Supabase (adatbázis és hitelesítés) — adattárolás
+- Vercel (tárhelyszolgáltatás) — az alkalmazás futtatása
+- Resend (email-küldés) — rendszerüzenetek kézbesítése
+
+Az adatfeldolgozók az Európai Unió, illetve azzal megfelelő
+adatvédelmi szintet biztosító országok szervereit használják.
 
 5. Az érintettek jogai
 
