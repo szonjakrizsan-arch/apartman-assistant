@@ -110,6 +110,7 @@ export async function fetchFeed(
 export async function fetchAllBookings(
   feeds: FeedConfig[],
   firstCheckins: Record<string, string> = {},
+  knownBookings: Record<string, { firstCheckin: string; lastCheckout: string; apartment: string; accent: string; source: string }> = {},
 ): Promise<{
   bookings: Booking[];
   errors:   string[];
@@ -121,6 +122,7 @@ export async function fetchAllBookings(
   const bookings: Booking[] = [];
   const errors:   string[]  = [];
   const seen = new Set<string>();
+  const seenStableKeys = new Set<string>();
 
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
@@ -132,8 +134,44 @@ export async function fetchAllBookings(
       const key = `${b.apartment}::${b._checkinRaw}::${b.source}`;
       if (seen.has(key)) continue;
       seen.add(key);
+      if ((b as any)._stableKey) seenStableKeys.add((b as any)._stableKey);
       bookings.push(b);
     }
+  }
+
+  /* ── "Feltámasztás": a feedből eltűnt, de ma még távozó foglalások ──
+     A Szállás.hu a checkout napján kiveszi a foglalást a feedből.
+     Ha a mentett checkout ma vagy a jövőben van, újrateremtjük "Távozik"-ként. */
+  const today = todayUTC();
+  for (const stableKey in knownBookings) {
+    if (seenStableKeys.has(stableKey)) continue; /* még a feedben van, nem kell */
+    const kb = knownBookings[stableKey];
+    if (!kb.lastCheckout) continue;
+    const checkout = parseIcalDate(kb.lastCheckout);
+    const checkin  = parseIcalDate(kb.firstCheckin);
+    /* Csak akkor mutatjuk, ha a checkout MA van (vagy ma még nem múlt el) */
+    if (checkout.getTime() !== today.getTime()) continue;
+    const nights = daysBetween(checkin, checkout);
+
+    bookings.push({
+      id:               `ical-${stableKey}`,
+      apartment:        kb.apartment,
+      accent:           kb.accent as Booking["accent"],
+      status:           "departing",
+      source:           kb.source as Booking["source"],
+      arrival:          formatHu(checkin),
+      departure:        formatHu(checkout),
+      nights:           nights > 0 ? nights : 1,
+      isTodayArrival:   false,
+      isTodayDeparture: true,
+      paymentStatus:    "pending",
+      _uid:          stableKey,
+      _summary:      "",
+      _checkinRaw:   kb.firstCheckin,
+      _checkoutRaw:  kb.lastCheckout,
+      _isActiveRaw:  false,
+      _stableKey:    stableKey,
+    } as Booking);
   }
 
   const ORDER: BookingStatus[] = ["arriving", "staying", "departing"];
