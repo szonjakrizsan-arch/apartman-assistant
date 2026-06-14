@@ -59,38 +59,52 @@ export function useIcalBookings(
 
     setStatus("loading");
     try {
-      /* 1. Ismert első érkezési dátumok betöltése */
+      /* 1. Ismert foglalások betöltése (kezdő + vég dátum) */
       let firstCheckins: Record<string, string> = {};
+      let knownBookings: Record<string, { firstCheckin: string; lastCheckout: string; apartment: string; accent: string; source: string }> = {};
       if (userId) {
         const { data } = await supabase
           .from("booking_starts")
-          .select("booking_key, first_checkin")
+          .select("booking_key, first_checkin, last_checkout")
           .eq("user_id", userId);
         for (const row of data ?? []) {
           firstCheckins[row.booking_key] = row.first_checkin;
+          /* A kulcsból kiolvassuk az apartman/forrás adatot: "Kalóz::20260614::szallas" */
+          const parts = (row.booking_key as string).split("::");
+          knownBookings[row.booking_key] = {
+            firstCheckin: row.first_checkin,
+            lastCheckout: row.last_checkout ?? "",
+            apartment:    parts[0] ?? "",
+            accent:       "coral",
+            source:       parts[2] ?? "szallas",
+          };
         }
       }
 
-      /* 2. Feed-ek letöltése a már ismert kezdetekkel */
+      /* Az apartman accent-jét a feedConfigs-ból pótoljuk (pontosabb, mint a default) */
+      for (const key in knownBookings) {
+        const apt = apartments.find((a) => a.name === knownBookings[key].apartment);
+        if (apt) knownBookings[key].accent = apt.accent;
+      }
+
+      /* 2. Feed-ek letöltése a már ismert adatokkal */
       const [{ bookings: b, errors: e }, future] = await Promise.all([
-        fetchAllBookings(feedConfigs, firstCheckins),
+        fetchAllBookings(feedConfigs, firstCheckins, knownBookings),
         fetchFutureBookings(feedConfigs),
       ]);
 
-      /* 3. Új foglalások első érkezési dátumának mentése */
+      /* 3. Foglalások mentése/frissítése (kezdő + vég dátum) */
       if (userId) {
-        const newOnes = b.filter((bk) => {
-          const key = (bk as any)._stableKey as string | undefined;
-          return key && !(key in firstCheckins) && bk._checkinRaw;
-        });
-        if (newOnes.length > 0) {
+        const toSave = b.filter((bk) => (bk as any)._stableKey && bk._checkinRaw && bk._checkoutRaw);
+        if (toSave.length > 0) {
           await supabase.from("booking_starts").upsert(
-            newOnes.map((bk) => ({
+            toSave.map((bk) => ({
               user_id:       userId,
               booking_key:   (bk as any)._stableKey,
-              first_checkin: bk._checkinRaw!,
+              first_checkin: firstCheckins[(bk as any)._stableKey] ?? bk._checkinRaw!,
+              last_checkout: bk._checkoutRaw!,
             })),
-            { onConflict: "user_id,booking_key", ignoreDuplicates: true },
+            { onConflict: "user_id,booking_key" },
           );
         }
       }
