@@ -158,7 +158,7 @@ export async function fetchAllBookings(
       apartment:        kb.apartment,
       accent:           kb.accent as Booking["accent"],
       status:           "departing",
-      source:           kb.source as Booking["source"],
+      source:           (SOURCE_MAP[kb.source as FeedSource] ?? "Szallas.hu") as Booking["source"],
       arrival:          formatHu(checkin),
       departure:        formatHu(checkout),
       nights:           nights > 0 ? nights : 1,
