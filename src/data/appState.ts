@@ -318,7 +318,6 @@ export interface DerivedInvoice {
 
 export function deriveInvoices(liveBookings: Booking[], paymentData: Record<string, PaymentData>): DerivedInvoice[] {
   return liveBookings
-    .filter((b) => { const pd = paymentData[b.id] ?? makeEmptyPayment(); return pd.amount.trim() || pd.status === "paid"; })
     .map((b) => {
       const pd = paymentData[b.id] ?? makeEmptyPayment();
       const overdue = pd.status === "pending" && b.status === "departing";
