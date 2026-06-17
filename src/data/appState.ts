@@ -76,6 +76,16 @@ export function isCustomTaskActiveToday(task: CustomTask): boolean {
   return false;
 }
 
+/** Ma elvégzettnek számít-e az ismétlődő feladat?
+ *  Csak akkor, ha done=true ÉS a doneDate a mai nap.
+ *  Régi (tegnapi/múltheti) doneDate esetén ma kipipálatlan. */
+export function isCustomTaskDoneToday(task: CustomTask): boolean {
+  if (!task.done) return false;
+  if (!task.doneDate) return false;
+  const today = new Date().toISOString().slice(0, 10);
+  return task.doneDate === today;
+}
+
 export interface AppState {
   detailStates: Record<string, BookingDetailState>;
   paymentData:  Record<string, PaymentData>;
@@ -144,13 +154,24 @@ export function useAppState(userId?: string): AppState & AppStateActions {
     }
 
     if (tasks) {
-      setCustomTasks(tasks.map((t) => ({
-        id:         t.id,
-        label:      t.label,
-        recurrence: t.recurrence as CustomTaskRecurrence,
-        done:       t.done ?? false,
-        doneDate:   t.done_date ?? null,
-      })));
+      const today = new Date().toISOString().slice(0, 10);
+      const cleaned = tasks.map((t) => {
+        const isStale = t.done && t.done_date !== today;
+        return {
+          id:         t.id,
+          label:      t.label,
+          recurrence: t.recurrence as CustomTaskRecurrence,
+          done:       isStale ? false : (t.done ?? false),
+          doneDate:   isStale ? null  : (t.done_date ?? null),
+        };
+      });
+      setCustomTasks(cleaned);
+      const staleIds = tasks.filter((t) => t.done && t.done_date !== today).map((t) => t.id);
+      if (staleIds.length > 0) {
+        await supabase.from("custom_tasks")
+          .update({ done: false, done_date: null })
+          .in("id", staleIds);
+      }
     }
   }, [userId]);
 
