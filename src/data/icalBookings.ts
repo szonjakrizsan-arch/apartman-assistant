@@ -51,7 +51,8 @@ function normalizeEvent(
   const checkout = parseIcalDate(dtend);
   const nights   = daysBetween(checkin, checkout);
 
-  if (summary.toLowerCase().includes("not available")) return null;
+  const isKnownBooking = stableKey in firstCheckins;
+  if (!isKnownBooking && summary.toLowerCase().includes("not available")) return null;
   if (nights <= 0) return null;
 
   const isActive        = checkin <= today && today < checkout;
