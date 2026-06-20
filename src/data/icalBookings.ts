@@ -52,7 +52,8 @@ function normalizeEvent(
   const nights   = daysBetween(checkin, checkout);
 
   const isKnownBooking = stableKey in firstCheckins;
-  if (!isKnownBooking && summary.toLowerCase().includes("not available")) return null;
+const isArrivingToday = checkin.getTime() === today.getTime();
+if (!isKnownBooking && !isArrivingToday && summary.toLowerCase().includes("not available")) return null;
   if (nights <= 0) return null;
 
   const isActive        = checkin <= today && today < checkout;
