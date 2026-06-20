@@ -53,10 +53,16 @@ function normalizeEvent(
 
   const isKnownBooking = stableKey in firstCheckins;
 const isArrivingToday = checkin.getTime() === today.getTime();
-if (!isKnownBooking && !isArrivingToday && summary.toLowerCase().includes("not available")) return null;
-if (nights <= 0) return null;
-  if (nights <= 0) return null;
+const isNotAvailable = summary.toLowerCase().includes("not available");
 
+if (isNotAvailable) {
+  if (feed.source === "airbnb") {
+    if (!isKnownBooking) return null;
+  } else {
+    if (!isKnownBooking && !isArrivingToday) return null;
+  }
+}
+if (nights <= 0) return null;
   const isActive        = checkin <= today && today < checkout;
   const isCheckoutToday = today.getTime() === checkout.getTime();
   if (!isActive && !isCheckoutToday) return null;
