@@ -75,11 +75,12 @@ function normalizeEvent(
   const isNotAvailable = summary.toLowerCase().includes("not available");
 
   if (isNotAvailable) {
-    if (feed.source === "airbnb") {
-      if (!isKnownBooking) return null;
-    } else {
+    if (feed.source === "szallas") {
       if (!isKnownBooking && !isArrivingToday) return null;
     }
+    /* Az Airbnb nem csonkítja a dátumokat, ezért megbízható akkor is,
+       ha még nem "ismert" — a lenti isActive/isCheckoutToday szűrés
+       úgyis csak a mára releváns foglalásokat engedi át. */
   }
   if (nights <= 0) return null;
   const isActive        = checkin <= today && today < checkout;
