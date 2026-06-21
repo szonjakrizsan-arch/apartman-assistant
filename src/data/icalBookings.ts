@@ -101,6 +101,7 @@ function normalizeEvent(
     isTodayArrival:   status === "arriving",
     isTodayDeparture: status === "departing",
     paymentStatus:    "pending" as const,
+    hasSourceConflict: false,
     _uid:          uid,
     _summary:      summary,
     _checkinRaw:   effectiveStart,
@@ -160,6 +161,9 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
         }
       }
 
+      if (list.length > 1) {
+        best = { ...best, hasSourceConflict: true };
+      }
       result.push(best);
     }
   }
