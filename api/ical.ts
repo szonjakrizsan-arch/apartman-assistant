@@ -20,6 +20,7 @@ const ALLOWED_ORIGINS = [
   "homeaway.com",
   "tripadvisor.com",
   "expedia.com",
+  "githubusercontent.com",
 ];
 
 function isAllowed(url: string): boolean {
