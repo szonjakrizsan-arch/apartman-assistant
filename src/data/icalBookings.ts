@@ -142,6 +142,7 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
       if (used[i]) continue;
       let best = list[i];
       used[i] = true;
+      let conflict = false;
 
       for (let j = i + 1; j < list.length; j++) {
         if (used[j]) continue;
@@ -149,6 +150,12 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
 
         used[j] = true;
         const candidate = list[j];
+
+        const sameDates =
+          candidate._checkinRaw === best._checkinRaw &&
+          candidate._checkoutRaw === best._checkoutRaw;
+        if (!sameDates) conflict = true;
+
         const bestPrio = SOURCE_PRIORITY[best.source] ?? 99;
         const candPrio = SOURCE_PRIORITY[candidate.source] ?? 99;
 
@@ -161,7 +168,7 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
         }
       }
 
-      if (list.length > 1) {
+      if (conflict) {
         best = { ...best, hasSourceConflict: true };
       }
       result.push(best);
