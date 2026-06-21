@@ -1,4 +1,4 @@
-import { CalendarDays, ArrowRight, KeyRound, DoorOpen, Moon, Check, AlertTriangle } from "lucide-react";
+import { CalendarDays, ArrowRight, KeyRound, DoorOpen, Moon, Check, AlertTriangle, Home } from "lucide-react";
 import type { Booking } from "../data/mockData";
 import { accentStyles, sourceStyles } from "../lib/theme";
 
@@ -52,8 +52,8 @@ export function BookingCard({
       />
 
       {/* Today badge row */}
-      {(booking.isTodayArrival || booking.isTodayDeparture) && (
-        <div className="mb-3 flex gap-2 pl-4">
+      {(booking.isTodayArrival || booking.isTodayDeparture || (!booking.isTodayArrival && !booking.isTodayDeparture) || booking.hasSourceConflict) && (
+        <div className="mb-3 flex flex-wrap gap-2 pl-4">
           {booking.isTodayArrival && (
             <span
               className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
@@ -78,6 +78,32 @@ export function BookingCard({
             >
               <DoorOpen className="h-2.5 w-2.5" aria-hidden />
               Ma távozik
+            </span>
+          )}
+          {!booking.isTodayArrival && !booking.isTodayDeparture && (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+              style={{
+                background: "rgb(99 190 162 / 0.13)",
+                color: "#63bea2",
+                boxShadow: "0 0 0 1px rgb(99 190 162 / 0.26)",
+              }}
+            >
+              <Home className="h-2.5 w-2.5" aria-hidden />
+              Bent van
+            </span>
+          )}
+          {booking.hasSourceConflict && (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+              style={{
+                background: "rgb(217 171 78 / 0.13)",
+                color: "#ddb055",
+                boxShadow: "0 0 0 1px rgb(217 171 78 / 0.26)",
+              }}
+            >
+              <AlertTriangle className="h-2.5 w-2.5" aria-hidden />
+              Eltérő dátum — ellenőrizd
             </span>
           )}
         </div>
