@@ -7,6 +7,13 @@
  * (a DTSTART előre csúszik), ezért stabil kulcsot használunk
  * (apartman + távozás + forrás), és az először látott érkezési
  * dátumot vesszük figyelembe (firstCheckins).
+ *
+ * Kereszt-forrás ütközés: ha ugyanarra az apartmanra két különböző
+ * forrásból (pl. Airbnb és Szállás.hu) időben átfedő esemény érkezik,
+ * ez valójában egyetlen fizikai foglalás — a platformok csak eltérő
+ * (esetenként csonkított) dátumot jelentenek róla. Ilyenkor egyetlen
+ * verziót tartunk meg, forrás-prioritás alapján (Airbnb > Szállás.hu),
+ * mert az Airbnb nem csonkítja a múltbeli dátumokat, a Szállás.hu igen.
  */
 
 import type { Booking, BookingStatus, BookingSource } from "./mockData";
@@ -22,6 +29,18 @@ const SOURCE_MAP: Record<FeedSource, BookingSource> = {
   vrbo:        "VRBO",
   tripadvisor: "TripAdvisor",
   expedia:     "Expedia",
+};
+
+/* ── Forrás-prioritás kereszt-forrás ütközés esetén ──────────────── */
+/* Alacsonyabb szám = megbízhatóbb forrás (előnyt élvez). */
+const SOURCE_PRIORITY: Record<BookingSource, number> = {
+  Airbnb:      0,
+  Booking:     1,
+  VRBO:        2,
+  TripAdvisor: 3,
+  Expedia:     4,
+  Google:      5,
+  "Szallas.hu": 6,
 };
 
 /* ── Derive BookingStatus from dates ─────────────────────────────── */
@@ -52,17 +71,17 @@ function normalizeEvent(
   const nights   = daysBetween(checkin, checkout);
 
   const isKnownBooking = stableKey in firstCheckins;
-const isArrivingToday = checkin.getTime() === today.getTime();
-const isNotAvailable = summary.toLowerCase().includes("not available");
+  const isArrivingToday = checkin.getTime() === today.getTime();
+  const isNotAvailable = summary.toLowerCase().includes("not available");
 
-if (isNotAvailable) {
-  if (feed.source === "airbnb") {
-    if (!isKnownBooking) return null;
-  } else {
-    if (!isKnownBooking && !isArrivingToday) return null;
+  if (isNotAvailable) {
+    if (feed.source === "airbnb") {
+      if (!isKnownBooking) return null;
+    } else {
+      if (!isKnownBooking && !isArrivingToday) return null;
+    }
   }
-}
-if (nights <= 0) return null;
+  if (nights <= 0) return null;
   const isActive        = checkin <= today && today < checkout;
   const isCheckoutToday = today.getTime() === checkout.getTime();
   if (!isActive && !isCheckoutToday) return null;
@@ -89,6 +108,63 @@ if (nights <= 0) return null;
     _isActiveRaw:  isActive,
     _stableKey:    stableKey,
   } as Booking;
+}
+
+/* ── Kereszt-forrás ütközés-feloldás ──────────────────────────────
+   Ha ugyanarra az apartmanra két (vagy több) forrásból időben átfedő
+   esemény érkezik, ez egyetlen fizikai foglalás — csak a platformok
+   jelentenek róla eltérő dátumot. Egyetlen verziót tartunk meg:
+   forrás-prioritás alapján, egyenlő prioritás esetén a korábbi
+   érkezési dátumot részesítjük előnyben (kevésbé valószínű, hogy
+   csonkított/téves). */
+function rangesOverlap(a: Booking, b: Booking): boolean {
+  const aStart = parseIcalDate(a._checkinRaw!);
+  const aEnd   = parseIcalDate(a._checkoutRaw!);
+  const bStart = parseIcalDate(b._checkinRaw!);
+  const bEnd   = parseIcalDate(b._checkoutRaw!);
+  return aStart < bEnd && bStart < aEnd;
+}
+
+function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
+  const byApartment = new Map<string, Booking[]>();
+  for (const b of bookings) {
+    if (!byApartment.has(b.apartment)) byApartment.set(b.apartment, []);
+    byApartment.get(b.apartment)!.push(b);
+  }
+
+  const result: Booking[] = [];
+
+  for (const list of byApartment.values()) {
+    const used = new Array(list.length).fill(false);
+
+    for (let i = 0; i < list.length; i++) {
+      if (used[i]) continue;
+      let best = list[i];
+      used[i] = true;
+
+      for (let j = i + 1; j < list.length; j++) {
+        if (used[j]) continue;
+        if (!rangesOverlap(best, list[j])) continue;
+
+        used[j] = true;
+        const candidate = list[j];
+        const bestPrio = SOURCE_PRIORITY[best.source] ?? 99;
+        const candPrio = SOURCE_PRIORITY[candidate.source] ?? 99;
+
+        if (candPrio < bestPrio) {
+          best = candidate;
+        } else if (candPrio === bestPrio) {
+          const bestCheckin = parseIcalDate(best._checkinRaw!);
+          const candCheckin = parseIcalDate(candidate._checkinRaw!);
+          if (candCheckin < bestCheckin) best = candidate;
+        }
+      }
+
+      result.push(best);
+    }
+  }
+
+  return result;
 }
 
 /* ── Fetch + parse one feed (browser only) ───────────────────────── */
@@ -128,7 +204,7 @@ export async function fetchAllBookings(
     feeds.map((f) => fetchFeed(f, firstCheckins)),
   );
 
-  const bookings: Booking[] = [];
+  let bookings: Booking[] = [];
   const errors:   string[]  = [];
   const seen = new Set<string>();
   const seenStableKeys = new Set<string>();
@@ -182,6 +258,9 @@ export async function fetchAllBookings(
       _stableKey:    stableKey,
     } as Booking);
   }
+
+  /* ── Kereszt-forrás ütközés-feloldás ──────────────────────────── */
+  bookings = resolveCrossSourceOverlaps(bookings);
 
   const ORDER: BookingStatus[] = ["arriving", "staying", "departing"];
   bookings.sort((a, b) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status));
