@@ -70,18 +70,21 @@ function normalizeEvent(
   const checkout = parseIcalDate(dtend);
   const nights   = daysBetween(checkin, checkout);
 
-  const isKnownBooking = stableKey in firstCheckins;
+  const isKnownBooking  = stableKey in firstCheckins;
   const isArrivingToday = checkin.getTime() === today.getTime();
-  const isNotAvailable = summary.toLowerCase().includes("not available");
+  const isNotAvailable  = summary.toLowerCase().includes("not available");
+
+  /* Szállás.hu: ha ismeretlen ÉS nem ma érkezik, eldobjuk —
+     függetlenül a summary-tól, mert a truncation "Reserved"-ként
+     is megjelenhet, nem csak "Not available"-ként. */
+  if (feed.source === "szallas" && !isKnownBooking && !isArrivingToday) return null;
 
   if (isNotAvailable) {
-    if (feed.source === "szallas") {
-      if (!isKnownBooking && !isArrivingToday) return null;
-    }
     /* Az Airbnb nem csonkítja a dátumokat, ezért megbízható akkor is,
        ha még nem "ismert" — a lenti isActive/isCheckoutToday szűrés
        úgyis csak a mára releváns foglalásokat engedi át. */
   }
+
   if (nights <= 0) return null;
   const isActive        = checkin <= today && today < checkout;
   const isCheckoutToday = today.getTime() === checkout.getTime();
@@ -241,12 +244,11 @@ export async function fetchAllBookings(
      Ha a mentett checkout ma vagy a jövőben van, újrateremtjük "Távozik"-ként. */
   const today = todayUTC();
   for (const stableKey in knownBookings) {
-    if (seenStableKeys.has(stableKey)) continue; /* még a feedben van, nem kell */
+    if (seenStableKeys.has(stableKey)) continue;
     const kb = knownBookings[stableKey];
     if (!kb.lastCheckout) continue;
     const checkout = parseIcalDate(kb.lastCheckout);
     const checkin  = parseIcalDate(kb.firstCheckin);
-    /* Csak akkor mutatjuk, ha a checkout MA van (vagy ma még nem múlt el) */
     if (checkout.getTime() !== today.getTime()) continue;
     const nights = daysBetween(checkin, checkout);
 
