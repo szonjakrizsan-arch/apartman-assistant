@@ -88,8 +88,8 @@ export function ContactsScreen({ appState, ical, userId }: ContactsScreenProps) 
       const year      = (parts[1] ?? "").slice(0, 4);
       if (apartment) {
         contactMap.get(key)!.bookings.push({
-          arrival:   "—",
-          departure: "—",
+          arrival:   "korábbi foglalás",
+          departure: "",
           apartment,
           year,
         });
