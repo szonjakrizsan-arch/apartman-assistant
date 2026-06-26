@@ -23,7 +23,6 @@ export function ContactsScreen({ appState, ical, userId }: ContactsScreenProps) 
   const { detailStates } = appState;
   const { contacts: manualContacts, addContact, deleteContact } = useManualContacts(userId);
 
-  /* Add form state */
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName]   = useState("");
   const [newRole, setNewRole]   = useState("");
@@ -41,12 +40,33 @@ export function ContactsScreen({ appState, ical, userId }: ContactsScreenProps) 
     setShowAdd(false);
   }
 
-  /* Build guest contact list from detailStates — keyed by contactName */
+  /* Build guest contact list from detailStates keys — így a lejárt
+     foglalások vendégei is megmaradnak, nem csak az aktívak. */
   const contactMap = new Map<string, Contact>();
 
-  for (const booking of ical.bookings) {
-    const detail = detailStates[booking.id];
-    if (!detail) continue;
+  /* Segédtérkép: booking_id → foglalás megjelenítési adatok.
+     Először az élő, majd a jövőbeli foglalásokból töltjük fel. */
+  const bookingMeta = new Map<string, { arrival: string; departure: string; apartment: string; year: string }>();
+  for (const b of ical.bookings) {
+    bookingMeta.set(b.id, {
+      arrival:   b.arrival,
+      departure: b.departure,
+      apartment: b.apartment,
+      year:      b._checkinRaw ? b._checkinRaw.slice(0, 4) : "",
+    });
+  }
+  for (const b of ical.futureBookings) {
+    bookingMeta.set(b.id, {
+      arrival:   b.arrival,
+      departure: `${b.nights} éj`,
+      apartment: b.apartment,
+      year:      b._checkinRaw ? b._checkinRaw.slice(0, 4) : "",
+    });
+  }
+
+  /* Végigmegyünk az összes mentett detailState kulcson —
+     így a lejárt foglalások vendégei is látszanak. */
+  for (const [bookingId, detail] of Object.entries(detailStates)) {
     const name  = detail.contactName?.trim();
     const phone = detail.contactPhone?.trim();
     const email = detail.contactEmail?.trim();
@@ -57,33 +77,24 @@ export function ContactsScreen({ appState, ical, userId }: ContactsScreenProps) 
       contactMap.set(key, { name: name || "—", phone: phone || "", email: email || "", bookings: [] });
     }
 
-    contactMap.get(key)!.bookings.push({
-      arrival:   booking.arrival,
-      departure: booking.departure,
-      apartment: booking.apartment,
-      year:      booking._checkinRaw ? booking._checkinRaw.slice(0, 4) : "",
-    });
-  }
-
-  /* Future bookings */
-  for (const booking of ical.futureBookings) {
-    const detail = detailStates[booking.id];
-    if (!detail) continue;
-    const name  = detail.contactName?.trim();
-    const phone = detail.contactPhone?.trim();
-    const email = (detail as any).contactEmail?.trim();
-    if (!name && !phone && !email) continue;
-
-    const key = name || phone || email;
-    if (!contactMap.has(key)) {
-      contactMap.set(key, { name: name || "—", phone: phone || "", email: email || "", bookings: [] });
+    const meta = bookingMeta.get(bookingId);
+    if (meta) {
+      contactMap.get(key)!.bookings.push(meta);
+    } else {
+      /* A foglalás már nincs a feedben — rekonstruáljuk a booking_id-ből.
+         Formátum: "ical-Korvett::20260621::szallas" */
+      const parts = bookingId.replace(/^ical-/, "").split("::");
+      const apartment = parts[0] ?? "";
+      const year      = (parts[1] ?? "").slice(0, 4);
+      if (apartment) {
+        contactMap.get(key)!.bookings.push({
+          arrival:   "—",
+          departure: "—",
+          apartment,
+          year,
+        });
+      }
     }
-    contactMap.get(key)!.bookings.push({
-      arrival:   booking.arrival,
-      departure: `${booking.nights} éj`,
-      apartment: booking.apartment,
-      year:      booking._checkinRaw ? booking._checkinRaw.slice(0, 4) : "",
-    });
   }
 
   const guestContacts = Array.from(contactMap.values()).sort((a, b) =>
@@ -186,7 +197,6 @@ export function ContactsScreen({ appState, ical, userId }: ContactsScreenProps) 
           </ul>
         )}
 
-        {/* Add form / button */}
         {showAdd ? (
           <div className="card-elevated rounded-2xl p-4 flex flex-col gap-3">
             <p className="text-[13px] font-semibold text-text-primary">Új kapcsolat</p>
