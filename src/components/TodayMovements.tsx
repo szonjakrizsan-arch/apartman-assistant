@@ -2,14 +2,12 @@ import { ArrowRight } from "lucide-react";
 import type { Booking } from "../data/mockData";
 import { BookingCard } from "./BookingCard";
 import { SectionHeader } from "./SectionHeader";
-
 interface TodayMovementsProps {
   movements: Booking[];
   onSeeAll?: () => void;
   isPaymentPaid: (id: string) => boolean;
   onPaymentToggle: (id: string) => void;
 }
-
 export function TodayMovements({
   movements,
   onSeeAll,
@@ -41,7 +39,6 @@ const staying = movements.filter(
       />
 <div className="card-elevated mb-3 rounded-xl px-4 py-3 border border-[#63bea230]">
   <div className="grid grid-cols-3 gap-4">
-
     <div>
       <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[#df8765]">
         Érkező
@@ -56,14 +53,13 @@ const staying = movements.filter(
         {arriving.map((b) => b.apartment).join(", ") || "Nincs ma"}
       </div>
     </div>
-
     <div>
       <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[#63bea2]">
         Bent van
       </div>
       <div
   className={
-    arriving.length
+    staying.length
       ? "text-[18px] font-semibold text-text-primary"
       : "text-[15px] font-medium text-text-secondary"
   }
@@ -71,14 +67,13 @@ const staying = movements.filter(
         {staying.map((b) => b.apartment).join(", ") || "Nincs ma"}
       </div>
     </div>
-
     <div>
       <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[#58b3be]">
         Távozó
       </div>
       <div
   className={
-    arriving.length
+    departing.length
       ? "text-[18px] font-semibold text-text-primary"
       : "text-[15px] font-medium text-text-secondary"
   }
@@ -86,7 +81,6 @@ const staying = movements.filter(
         {departing.map((b) => b.apartment).join(", ") || "Nincs ma"}
       </div>
     </div>
-
   </div>
 </div>
       <ul className="flex flex-col gap-3">
