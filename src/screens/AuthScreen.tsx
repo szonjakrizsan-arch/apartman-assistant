@@ -33,7 +33,7 @@ export function AuthScreen() {
         options: { data: { display_name: name } }
       });
       if (error) setError("Regisztráció sikertelen: " + error.message);
-      else setSuccess("Sikeres regisztráció! Ellenőrizze email fiókját a megerősítő linkért.");
+      else setSuccess("Sikeres regisztráció! A fiókod jóváhagyásra vár — hamarosan értesítünk.");
 
     } else if (mode === "forgot") {
       const { error } = await supabase.auth.resetPasswordForEmail(email);
