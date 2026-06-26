@@ -15,21 +15,33 @@ import { useAuth }        from "./hooks/useAuth";
 import type { TabId }     from "./types/navigation";
 import { useApartments } from "./hooks/useApartments";
 import { ApartmentsScreen } from "./screens/ApartmentsScreen";
+import { supabase } from "./supabaseClient";
 
 export default function App() {
   const [tab, setTab] = useState<TabId>("home");
-
   const { user, loading, passwordRecovery, clearRecovery } = useAuth();
   const appState = useAppState(user?.id);
-const { apartments, feeds, addApartment, deleteApartment, addFeed, deleteFeed } = useApartments(user?.id);
-const ical = useIcalBookings(apartments, feeds, user?.id);
+  const { apartments, feeds, addApartment, deleteApartment, addFeed, deleteFeed } = useApartments(user?.id);
+  const ical = useIcalBookings(apartments, feeds, user?.id);
+
+  const [approved, setApproved] = useState<boolean | null>(null);
+  const [approvedLoading, setApprovedLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setApproved(null); return; }
+    setApprovedLoading(true);
+    supabase.from("profiles").select("approved").eq("id", user.id).single()
+      .then(({ data }) => {
+        setApproved(data?.approved ?? false);
+        setApprovedLoading(false);
+      });
+  }, [user]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [tab]);
 
-  /* Betöltés közben */
-  if (loading) {
+  if (loading || approvedLoading) {
     return (
       <div className="min-h-dvh bg-surface flex items-center justify-center">
         <p className="text-text-muted text-[13px]">Betöltés...</p>
@@ -37,16 +49,36 @@ const ical = useIcalBookings(apartments, feeds, user?.id);
     );
   }
 
-  /* Jelszó visszaállítás folyamatban */
   if (passwordRecovery) {
     return <ResetPasswordScreen onDone={clearRecovery} />;
   }
-  /* Nincs bejelentkezve */
+
   if (!user) {
     return <AuthScreen />;
   }
 
-  /* Bejelentkezve */
+  if (approved === false) {
+    return (
+      <div className="min-h-dvh bg-surface flex items-center justify-center px-4">
+        <div className="w-full max-w-sm text-center flex flex-col items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl"
+            style={{ background: "rgb(99 190 162 / 0.15)", outline: "1px solid rgb(99 190 162 / 0.25)" }}>
+            <span className="text-2xl">🔐</span>
+          </div>
+          <h1 className="text-[18px] font-bold text-text-primary">Jóváhagyásra vár</h1>
+          <p className="text-[13px] text-text-secondary leading-relaxed">
+            A fiókod regisztrálva van, de még nem lett jóváhagyva. Hamarosan értesítünk!
+          </p>
+          <button type="button"
+            onClick={() => supabase.auth.signOut()}
+            className="mt-2 text-[12px] text-text-muted underline">
+            Kijelentkezés
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div key={user.id} className="min-h-dvh bg-surface flex">
       <SideNav active={tab} onChange={setTab} />
