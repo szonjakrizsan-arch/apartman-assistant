@@ -1,5 +1,5 @@
 /**
- * icalBookings.ts — normalize raw iCal events into the app's Booking shape.
+ * icalBookings.ts
  */
 
 import type { Booking, BookingStatus, BookingSource } from "./mockData";
@@ -84,14 +84,6 @@ function normalizeEvent(
   } as Booking;
 }
 
-/* ── Kereszt-forrás ütközés-feloldás ────────────────────────────────
-   Logika:
-   - Ha két különböző forrásból átfedő foglalás jön ugyanarra az
-     apartmanra, és a checkout eltérés <= 3 nap → ugyanaz a fizikai
-     foglalás, összevonjuk (Airbnb prioritással).
-   - Ha a checkout eltérés > 3 nap → valódi ütközés, mindkettőt
-     megjelenítjük + hasSourceConflict = true.
-*/
 function rangesOverlap(a: Booking, b: Booking): boolean {
   if (a.source === b.source) return false;
   const aStart = parseIcalDate(a._checkinRaw!);
@@ -125,27 +117,9 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
         if (used[j]) continue;
         if (!rangesOverlap(best, list[j])) continue;
 
+        used[j] = true;
         const candidate = list[j];
 
-        /* Checkout eltérés napokban */
-        const bestCheckout = parseIcalDate(best._checkoutRaw!);
-        const candCheckout = parseIcalDate(candidate._checkoutRaw!);
-        const checkoutDiff = Math.abs(daysBetween(bestCheckout, candCheckout));
-
-        if (checkoutDiff > CONFLICT_THRESHOLD_DAYS) {
-          /* Nagy eltérés = valódi ütközés, mindkettőt megjelenítjük */
-          conflict = true;
-          used[j] = true;
-          /* Mindkét foglalást konfliktusként jelöljük */
-          best = { ...best, hasSourceConflict: true };
-          result.push({ ...candidate, hasSourceConflict: true });
-          continue;
-        }
-
-       /* Összevonjuk, Airbnb prioritással */
-        used[j] = true;
-
-        /* Ha a checkout dátum eltér → konfliktus */
         const sameCheckout = candidate._checkoutRaw === best._checkoutRaw;
         if (!sameCheckout) conflict = true;
 
@@ -161,11 +135,10 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
         }
       }
 
-      if (!conflict) {
-        result.push(best);
-      } else if (!result.find(r => r._stableKey === best._stableKey)) {
-        result.push({ ...best, hasSourceConflict: true });
+      if (conflict) {
+        best = { ...best, hasSourceConflict: true };
       }
+      result.push(best);
     }
   }
 
@@ -227,8 +200,17 @@ export async function fetchAllBookings(
     }
   }
 
+  /* ── 1. Kereszt-forrás ütközés-feloldás ELŐSZÖR ── */
+  bookings = resolveCrossSourceOverlaps(bookings);
+
+  /* ── 2. Konfliktust jelző apartmanok listája ── */
+  const conflictedApartments = new Set(
+    bookings.filter(b => b.hasSourceConflict).map(b => b.apartment)
+  );
+
+  /* ── 3. Feltámasztás a feedből eltűnt, de ma még távozó foglalásoknak ── */
   const today = todayUTC();
-for (const stableKey in knownBookings) {
+  for (const stableKey in knownBookings) {
     if (seenStableKeys.has(stableKey)) continue;
     const kb = knownBookings[stableKey];
     if (!kb.lastCheckout) continue;
@@ -236,12 +218,6 @@ for (const stableKey in knownBookings) {
     const checkin  = parseIcalDate(kb.firstCheckin);
     if (checkout.getTime() !== today.getTime()) continue;
     const nights = daysBetween(checkin, checkout);
-
-    /* Ha ugyanerre az apartmanra már van konfliktust jelző foglalás,
-       a feltámasztott távozó is kapja meg a figyelmeztetést */
-    const hasConflict = bookings.some(
-      (b) => b.apartment === kb.apartment && b.hasSourceConflict
-    );
 
     bookings.push({
       id:               `ical-${stableKey}`,
@@ -255,7 +231,7 @@ for (const stableKey in knownBookings) {
       isTodayArrival:   false,
       isTodayDeparture: true,
       paymentStatus:    "pending",
-      hasSourceConflict: hasConflict,
+      hasSourceConflict: conflictedApartments.has(kb.apartment),
       _uid:          stableKey,
       _summary:      "",
       _checkinRaw:   kb.firstCheckin,
@@ -264,8 +240,6 @@ for (const stableKey in knownBookings) {
       _stableKey:    stableKey,
     } as Booking);
   }
-
-  bookings = resolveCrossSourceOverlaps(bookings);
 
   const ORDER: BookingStatus[] = ["arriving", "staying", "departing"];
   bookings.sort((a, b) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status));
