@@ -95,12 +95,8 @@ export function BookingCard({
           )}
           {booking.hasSourceConflict && (
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
-              style={{
-                background: "rgb(217 171 78 / 0.13)",
-                color: "#ddb055",
-                boxShadow: "0 0 0 1px rgb(217 171 78 / 0.26)",
-              }}
+              className="inline-flex items-center gap-1 text-[10px] font-medium"
+              style={{ color: "rgb(217 171 78 / 0.55)" }}
             >
               <AlertTriangle className="h-2.5 w-2.5" aria-hidden />
               Eltérő dátum — ellenőrizd
