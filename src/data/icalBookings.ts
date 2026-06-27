@@ -123,14 +123,12 @@ function normalizeEvent(
    érkezési dátumot részesítjük előnyben (kevésbé valószínű, hogy
    csonkított/téves). */
 function rangesOverlap(a: Booking, b: Booking): boolean {
-  /* Csak akkor ütközés, ha a két forrás KÜLÖNBÖZŐ — azonos forrás
-     egymást követő foglalásai nem ütköznek. */
   if (a.source === b.source) return false;
   const aStart = parseIcalDate(a._checkinRaw!);
   const aEnd   = parseIcalDate(a._checkoutRaw!);
   const bStart = parseIcalDate(b._checkinRaw!);
   const bEnd   = parseIcalDate(b._checkoutRaw!);
-  /* Szomszédos foglalások (egyik checkout = másik checkin) nem ütköznek */
+  /* Szomszédos foglalások nem ütköznek (checkout = checkin) */
   return aStart < bEnd && bStart < aEnd;
 }
 function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
@@ -158,10 +156,18 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
         used[j] = true;
         const candidate = list[j];
 
-        const sameDates =
-          candidate._checkinRaw === best._checkinRaw &&
-          candidate._checkoutRaw === best._checkoutRaw;
-        if (!sameDates) conflict = true;
+/* Csak akkor ugyanaz a fizikai foglalás, ha a checkout egyezik.
+           Ha a checkout eltér, ez két külön foglalás — nem ütközés. */
+        const sameCheckout = candidate._checkoutRaw === best._checkoutRaw;
+        if (!sameCheckout) {
+          /* Különböző checkout = két külön foglalás, nem ütközés.
+             Visszavonjuk az overlap-et: mindkét foglalást megtartjuk. */
+          used[j] = false;
+          continue;
+        }
+        /* Azonos checkout, de eltérő checkin = csonkítás miatti eltérés = konfliktus */
+        const sameCheckin = candidate._checkinRaw === best._checkinRaw;
+        if (!sameCheckin) conflict = true;
 
         const bestPrio = SOURCE_PRIORITY[best.source] ?? 99;
         const candPrio = SOURCE_PRIORITY[candidate.source] ?? 99;
