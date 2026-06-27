@@ -17,7 +17,14 @@ export function ResetPasswordScreen({ onDone }: { onDone: () => void }) {
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password });
     setLoading(false);
-    if (error) { setError("Hiba: " + error.message); return; }
+    if (error) {
+  if (error.message.includes("different from the old password")) {
+    setError("Az új jelszó nem lehet ugyanaz, mint a régi.");
+  } else {
+    setError("Hiba történt. Kérjük próbáld újra.");
+  }
+  return;
+}
     setSuccess(true);
     setTimeout(onDone, 2000);
   }
