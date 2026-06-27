@@ -228,7 +228,7 @@ export async function fetchAllBookings(
   }
 
   const today = todayUTC();
-  for (const stableKey in knownBookings) {
+for (const stableKey in knownBookings) {
     if (seenStableKeys.has(stableKey)) continue;
     const kb = knownBookings[stableKey];
     if (!kb.lastCheckout) continue;
@@ -236,6 +236,12 @@ export async function fetchAllBookings(
     const checkin  = parseIcalDate(kb.firstCheckin);
     if (checkout.getTime() !== today.getTime()) continue;
     const nights = daysBetween(checkin, checkout);
+
+    /* Ha ugyanerre az apartmanra már van konfliktust jelző foglalás,
+       a feltámasztott távozó is kapja meg a figyelmeztetést */
+    const hasConflict = bookings.some(
+      (b) => b.apartment === kb.apartment && b.hasSourceConflict
+    );
 
     bookings.push({
       id:               `ical-${stableKey}`,
@@ -249,6 +255,7 @@ export async function fetchAllBookings(
       isTodayArrival:   false,
       isTodayDeparture: true,
       paymentStatus:    "pending",
+      hasSourceConflict: hasConflict,
       _uid:          stableKey,
       _summary:      "",
       _checkinRaw:   kb.firstCheckin,
