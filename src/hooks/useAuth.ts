@@ -15,18 +15,32 @@ export function useAuth(): AuthState {
   const [passwordRecovery, setPasswordRecovery] = useState(false);
 
   useEffect(() => {
-    /* Aktuális session lekérése */
+    /* Aktuális session lekérése — recovery token detektálás URL-ből */
+    const hash = window.location.hash;
+    const isRecovery = hash.includes("type=recovery");
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      if (isRecovery && session?.user) {
+        setPasswordRecovery(true);
+        setUser(session.user);
+      } else {
+        setUser(session?.user ?? null);
+      }
       setLoading(false);
     });
+
     /* Session változás figyelése */
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setUser(session?.user ?? null);
-        if (event === "PASSWORD_RECOVERY") setPasswordRecovery(true);
+        if (event === "PASSWORD_RECOVERY") {
+          setPasswordRecovery(true);
+          setUser(session?.user ?? null);
+        } else {
+          setUser(session?.user ?? null);
+        }
       }
     );
+
     return () => subscription.unsubscribe();
   }, []);
 
