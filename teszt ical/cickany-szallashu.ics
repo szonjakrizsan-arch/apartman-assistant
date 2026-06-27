@@ -1,0 +1,47 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Szallas.hu//Reservation Calendar//HU
+X-WR-CALNAME:Cickány - Szállás.hu
+X-WR-CALDESC:Szallas.hu reservation calendar
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260628
+DTEND;VALUE=DATE:20260703
+SUMMARY:(Not available)
+UID:ical-Cickany::20260703::szallas
+DESCRIPTION:TRUNCATE SZIMULÁCIÓ: ez a foglalás 07.01-én kezdődött, de Szállás.hu mai napra csonkítja. Checkout: 07.03 helyes.
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260703
+DTEND;VALUE=DATE:20260708
+SUMMARY:Reserved
+UID:ical-Cickany::20260708::szallas
+DESCRIPTION:Foglalás - Szallas.hu
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260628
+DTEND;VALUE=DATE:20260714
+SUMMARY:(Not available)
+UID:ical-Cickany::20260714::szallas
+DESCRIPTION:TRUNCATE SZIMULÁCIÓ 2: 07.10-én kezdődő foglalás, Szállás.hu 06.28-ra csonkítja. booking_starts-ban 20260710 checkin mentve.
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260717
+DTEND;VALUE=DATE:20260722
+SUMMARY:Reserved
+UID:ical-Cickany::20260722::szallas
+DESCRIPTION:Foglalás - Szallas.hu
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260722
+DTEND;VALUE=DATE:20260725
+SUMMARY:Reserved
+UID:ical-Cickany::20260725::szallas
+DESCRIPTION:Foglalás - Szallas.hu
+END:VEVENT
+
+END:VCALENDAR
