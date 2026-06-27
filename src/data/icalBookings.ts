@@ -105,40 +105,45 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
   const result: Booking[] = [];
 
   for (const list of byApartment.values()) {
-    const used = new Array(list.length).fill(false);
+    const toKeep = new Set<number>();
+    const trueConflicts = new Set<number>();
 
     for (let i = 0; i < list.length; i++) {
-      if (used[i]) continue;
-      let best = list[i];
-      used[i] = true;
-      let conflict = false;
-
       for (let j = i + 1; j < list.length; j++) {
-        if (used[j]) continue;
-        if (!rangesOverlap(best, list[j])) continue;
+        if (!rangesOverlap(list[i], list[j])) continue;
 
-        used[j] = true;
-        const candidate = list[j];
-
-        const sameCheckout = candidate._checkoutRaw === best._checkoutRaw;
-        if (!sameCheckout) conflict = true;
-
-        const bestPrio = SOURCE_PRIORITY[best.source] ?? 99;
-        const candPrio = SOURCE_PRIORITY[candidate.source] ?? 99;
-
-        if (candPrio < bestPrio) {
-          best = candidate;
-        } else if (candPrio === bestPrio) {
-          const bestCheckin = parseIcalDate(best._checkinRaw!);
-          const candCheckin = parseIcalDate(candidate._checkinRaw!);
-          if (candCheckin < bestCheckin) best = candidate;
+        const sameCheckout = list[i]._checkoutRaw === list[j]._checkoutRaw;
+        if (!sameCheckout) {
+          toKeep.add(i);
+          toKeep.add(j);
+          trueConflicts.add(i);
+          trueConflicts.add(j);
+        } else {
+          const iPrio = SOURCE_PRIORITY[list[i].source] ?? 99;
+          const jPrio = SOURCE_PRIORITY[list[j].source] ?? 99;
+          if (iPrio <= jPrio) {
+            toKeep.add(i);
+          } else {
+            toKeep.add(j);
+          }
         }
       }
+    }
 
-      if (conflict) {
-        best = { ...best, hasSourceConflict: true };
+    for (let i = 0; i < list.length; i++) {
+      let hasAnyOverlap = false;
+      for (let j = 0; j < list.length; j++) {
+        if (i === j) continue;
+        if (rangesOverlap(list[i], list[j])) { hasAnyOverlap = true; break; }
       }
-      result.push(best);
+      if (!hasAnyOverlap) toKeep.add(i);
+    }
+
+    for (const i of toKeep) {
+      const b = trueConflicts.has(i)
+        ? { ...list[i], hasSourceConflict: true }
+        : list[i];
+      result.push(b);
     }
   }
 
