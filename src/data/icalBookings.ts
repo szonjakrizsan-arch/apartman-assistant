@@ -142,22 +142,22 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
           continue;
         }
 
-        /* Kis eltérés = ugyanaz a fizikai foglalás, összevonjuk */
+       /* Összevonjuk, Airbnb prioritással */
         used[j] = true;
-        const sameCheckin = candidate._checkinRaw === best._checkinRaw;
-        if (!sameCheckin) conflict = true;
+
+        /* Ha a checkout dátum eltér → konfliktus */
+        const sameCheckout = candidate._checkoutRaw === best._checkoutRaw;
+        if (!sameCheckout) conflict = true;
 
         const bestPrio = SOURCE_PRIORITY[best.source] ?? 99;
         const candPrio = SOURCE_PRIORITY[candidate.source] ?? 99;
 
         if (candPrio < bestPrio) {
-          best = { ...best, ...candidate, hasSourceConflict: conflict };
+          best = candidate;
         } else if (candPrio === bestPrio) {
           const bestCheckin = parseIcalDate(best._checkinRaw!);
           const candCheckin = parseIcalDate(candidate._checkinRaw!);
-          if (candCheckin < bestCheckin) {
-            best = { ...best, ...candidate, hasSourceConflict: conflict };
-          }
+          if (candCheckin < bestCheckin) best = candidate;
         }
       }
 
