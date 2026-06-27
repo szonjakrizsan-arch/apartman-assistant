@@ -123,13 +123,16 @@ function normalizeEvent(
    érkezési dátumot részesítjük előnyben (kevésbé valószínű, hogy
    csonkított/téves). */
 function rangesOverlap(a: Booking, b: Booking): boolean {
+  /* Csak akkor ütközés, ha a két forrás KÜLÖNBÖZŐ — azonos forrás
+     egymást követő foglalásai nem ütköznek. */
+  if (a.source === b.source) return false;
   const aStart = parseIcalDate(a._checkinRaw!);
   const aEnd   = parseIcalDate(a._checkoutRaw!);
   const bStart = parseIcalDate(b._checkinRaw!);
   const bEnd   = parseIcalDate(b._checkoutRaw!);
+  /* Szomszédos foglalások (egyik checkout = másik checkin) nem ütköznek */
   return aStart < bEnd && bStart < aEnd;
 }
-
 function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
   const byApartment = new Map<string, Booking[]>();
   for (const b of bookings) {
