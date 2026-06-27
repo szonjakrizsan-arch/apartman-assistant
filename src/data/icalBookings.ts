@@ -101,7 +101,7 @@ function rangesOverlap(a: Booking, b: Booking): boolean {
   return aStart < bEnd && bStart < aEnd;
 }
 
-const CONFLICT_THRESHOLD_DAYS = 3;
+const CONFLICT_THRESHOLD_DAYS = 0;
 
 function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
   const byApartment = new Map<string, Booking[]>();
