@@ -1,26 +1,11 @@
 /**
  * icalBookings.ts — normalize raw iCal events into the app's Booking shape.
- *
- * READ-ONLY. No external writes. No OTA sync.
- *
- * Megjegyzés: a Szállás.hu feed naponta "levágja" a múltbeli napokat
- * (a DTSTART előre csúszik), ezért stabil kulcsot használunk
- * (apartman + távozás + forrás), és az először látott érkezési
- * dátumot vesszük figyelembe (firstCheckins).
- *
- * Kereszt-forrás ütközés: ha ugyanarra az apartmanra két különböző
- * forrásból (pl. Airbnb és Szállás.hu) időben átfedő esemény érkezik,
- * ez valójában egyetlen fizikai foglalás — a platformok csak eltérő
- * (esetenként csonkított) dátumot jelentenek róla. Ilyenkor egyetlen
- * verziót tartunk meg, forrás-prioritás alapján (Airbnb > Szállás.hu),
- * mert az Airbnb nem csonkítja a múltbeli dátumokat, a Szállás.hu igen.
  */
 
 import type { Booking, BookingStatus, BookingSource } from "./mockData";
 import type { FeedConfig, FeedSource } from "./icalFeeds";
 import { parseIcal, parseIcalDate, formatHu, daysBetween, todayUTC } from "./icalFeeds";
 
-/* ── Source mapping ──────────────────────────────────────────────── */
 const SOURCE_MAP: Record<FeedSource, BookingSource> = {
   szallas:     "Szallas.hu",
   airbnb:      "Airbnb",
@@ -31,8 +16,6 @@ const SOURCE_MAP: Record<FeedSource, BookingSource> = {
   expedia:     "Expedia",
 };
 
-/* ── Forrás-prioritás kereszt-forrás ütközés esetén ──────────────── */
-/* Alacsonyabb szám = megbízhatóbb forrás (előnyt élvez). */
 const SOURCE_PRIORITY: Record<BookingSource, number> = {
   Airbnb:      0,
   Booking:     1,
@@ -43,7 +26,6 @@ const SOURCE_PRIORITY: Record<BookingSource, number> = {
   "Szallas.hu": 6,
 };
 
-/* ── Derive BookingStatus from dates ─────────────────────────────── */
 function deriveStatus(checkin: Date, checkout: Date, today: Date): BookingStatus {
   if (today.getTime() === checkin.getTime()) return "arriving";
   if (today.getTime() === checkout.getTime()) return "departing";
@@ -51,7 +33,6 @@ function deriveStatus(checkin: Date, checkout: Date, today: Date): BookingStatus
   return "staying";
 }
 
-/* ── Normalise one raw iCal event into a Booking ─────────────────── */
 function normalizeEvent(
   feed: FeedConfig,
   uid: string,
@@ -61,9 +42,7 @@ function normalizeEvent(
   today: Date,
   firstCheckins: Record<string, string>,
 ): Booking | null {
-  /* Stabil kulcs: nem változik akkor sem, ha a feed levágja a múltat */
   const stableKey = `${feed.apartment}::${dtend}::${feed.source}`;
-  /* Az először látott érkezési dátum számít, nem a feed mai állapota */
   const effectiveStart = firstCheckins[stableKey] ?? dtstart;
 
   const checkin  = parseIcalDate(effectiveStart);
@@ -72,18 +51,8 @@ function normalizeEvent(
 
   const isKnownBooking  = stableKey in firstCheckins;
   const isArrivingToday = checkin.getTime() === today.getTime();
-  const isNotAvailable  = summary.toLowerCase().includes("not available");
 
-  /* Szállás.hu: ha ismeretlen ÉS nem ma érkezik, eldobjuk —
-     függetlenül a summary-tól, mert a truncation "Reserved"-ként
-     is megjelenhet, nem csak "Not available"-ként. */
   if (feed.source === "szallas" && !isKnownBooking && !isArrivingToday) return null;
-
-  if (isNotAvailable) {
-    /* Az Airbnb nem csonkítja a dátumokat, ezért megbízható akkor is,
-       ha még nem "ismert" — a lenti isActive/isCheckoutToday szűrés
-       úgyis csak a mára releváns foglalásokat engedi át. */
-  }
 
   if (nights <= 0) return null;
   const isActive        = checkin <= today && today < checkout;
@@ -115,22 +84,25 @@ function normalizeEvent(
   } as Booking;
 }
 
-/* ── Kereszt-forrás ütközés-feloldás ──────────────────────────────
-   Ha ugyanarra az apartmanra két (vagy több) forrásból időben átfedő
-   esemény érkezik, ez egyetlen fizikai foglalás — csak a platformok
-   jelentenek róla eltérő dátumot. Egyetlen verziót tartunk meg:
-   forrás-prioritás alapján, egyenlő prioritás esetén a korábbi
-   érkezési dátumot részesítjük előnyben (kevésbé valószínű, hogy
-   csonkított/téves). */
+/* ── Kereszt-forrás ütközés-feloldás ────────────────────────────────
+   Logika:
+   - Ha két különböző forrásból átfedő foglalás jön ugyanarra az
+     apartmanra, és a checkout eltérés <= 3 nap → ugyanaz a fizikai
+     foglalás, összevonjuk (Airbnb prioritással).
+   - Ha a checkout eltérés > 3 nap → valódi ütközés, mindkettőt
+     megjelenítjük + hasSourceConflict = true.
+*/
 function rangesOverlap(a: Booking, b: Booking): boolean {
   if (a.source === b.source) return false;
   const aStart = parseIcalDate(a._checkinRaw!);
   const aEnd   = parseIcalDate(a._checkoutRaw!);
   const bStart = parseIcalDate(b._checkinRaw!);
   const bEnd   = parseIcalDate(b._checkoutRaw!);
-  /* Szomszédos foglalások nem ütköznek (checkout = checkin) */
   return aStart < bEnd && bStart < aEnd;
 }
+
+const CONFLICT_THRESHOLD_DAYS = 3;
+
 function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
   const byApartment = new Map<string, Booking[]>();
   for (const b of bookings) {
@@ -153,19 +125,25 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
         if (used[j]) continue;
         if (!rangesOverlap(best, list[j])) continue;
 
-        used[j] = true;
         const candidate = list[j];
 
-/* Csak akkor ugyanaz a fizikai foglalás, ha a checkout egyezik.
-           Ha a checkout eltér, ez két külön foglalás — nem ütközés. */
-        const sameCheckout = candidate._checkoutRaw === best._checkoutRaw;
-        if (!sameCheckout) {
-          /* Különböző checkout = két külön foglalás, nem ütközés.
-             Visszavonjuk az overlap-et: mindkét foglalást megtartjuk. */
-          used[j] = false;
+        /* Checkout eltérés napokban */
+        const bestCheckout = parseIcalDate(best._checkoutRaw!);
+        const candCheckout = parseIcalDate(candidate._checkoutRaw!);
+        const checkoutDiff = Math.abs(daysBetween(bestCheckout, candCheckout));
+
+        if (checkoutDiff > CONFLICT_THRESHOLD_DAYS) {
+          /* Nagy eltérés = valódi ütközés, mindkettőt megjelenítjük */
+          conflict = true;
+          used[j] = true;
+          /* Mindkét foglalást konfliktusként jelöljük */
+          best = { ...best, hasSourceConflict: true };
+          result.push({ ...candidate, hasSourceConflict: true });
           continue;
         }
-        /* Azonos checkout, de eltérő checkin = csonkítás miatti eltérés = konfliktus */
+
+        /* Kis eltérés = ugyanaz a fizikai foglalás, összevonjuk */
+        used[j] = true;
         const sameCheckin = candidate._checkinRaw === best._checkinRaw;
         if (!sameCheckin) conflict = true;
 
@@ -173,25 +151,27 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
         const candPrio = SOURCE_PRIORITY[candidate.source] ?? 99;
 
         if (candPrio < bestPrio) {
-          best = candidate;
+          best = { ...best, ...candidate, hasSourceConflict: conflict };
         } else if (candPrio === bestPrio) {
           const bestCheckin = parseIcalDate(best._checkinRaw!);
           const candCheckin = parseIcalDate(candidate._checkinRaw!);
-          if (candCheckin < bestCheckin) best = candidate;
+          if (candCheckin < bestCheckin) {
+            best = { ...best, ...candidate, hasSourceConflict: conflict };
+          }
         }
       }
 
-      if (conflict) {
-        best = { ...best, hasSourceConflict: true };
+      if (!conflict) {
+        result.push(best);
+      } else if (!result.find(r => r._stableKey === best._stableKey)) {
+        result.push({ ...best, hasSourceConflict: true });
       }
-      result.push(best);
     }
   }
 
   return result;
 }
 
-/* ── Fetch + parse one feed (browser only) ───────────────────────── */
 export async function fetchFeed(
   feed: FeedConfig,
   firstCheckins: Record<string, string>,
@@ -215,7 +195,6 @@ export async function fetchFeed(
   }
 }
 
-/* ── Fetch all feeds, merge, deduplicate ─────────────────────────── */
 export async function fetchAllBookings(
   feeds: FeedConfig[],
   firstCheckins: Record<string, string> = {},
@@ -248,9 +227,6 @@ export async function fetchAllBookings(
     }
   }
 
-  /* ── "Feltámasztás": a feedből eltűnt, de ma még távozó foglalások ──
-     A Szállás.hu a checkout napján kiveszi a foglalást a feedből.
-     Ha a mentett checkout ma vagy a jövőben van, újrateremtjük "Távozik"-ként. */
   const today = todayUTC();
   for (const stableKey in knownBookings) {
     if (seenStableKeys.has(stableKey)) continue;
@@ -282,7 +258,6 @@ export async function fetchAllBookings(
     } as Booking);
   }
 
-  /* ── Kereszt-forrás ütközés-feloldás ──────────────────────────── */
   bookings = resolveCrossSourceOverlaps(bookings);
 
   const ORDER: BookingStatus[] = ["arriving", "staying", "departing"];
@@ -291,7 +266,6 @@ export async function fetchAllBookings(
   return { bookings, errors };
 }
 
-/* ── Fetch future bookings (next 60 days, not today) ─────────────── */
 export async function fetchFutureBookings(feeds: FeedConfig[]): Promise<import("./mockData").FutureBooking[]> {
   const today  = todayUTC();
   const cutoff = new Date(today.getTime() + 60 * 86_400_000);
