@@ -65,6 +65,19 @@ export function FutureBookingRow({ booking, onOpen }: FutureBookingRowProps) {
         <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${source.badge}`}>
           {source.label}
         </span>
+        {/* Conflict badge */}
+{booking.hasSourceConflict && (
+  <span
+    className="flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-semibold"
+    style={{
+      background: "rgb(217 171 78 / 0.15)",
+      color: "#f0c040",
+      boxShadow: "0 0 0 1px rgb(217 171 78 / 0.55)",
+    }}
+  >
+    ⚠
+  </span>
+)}
       </div>
 
     </article>
