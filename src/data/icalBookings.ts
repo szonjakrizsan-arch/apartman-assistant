@@ -276,9 +276,9 @@ export async function fetchFutureBookings(feeds: FeedConfig[]): Promise<import("
       const nights = daysBetween(checkin, checkout);
       if (nights <= 0) continue;
       const feed = feeds[i];
-      const key  = `${feed.apartment}::${e.dtstart}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
+      const key  = `${feed.apartment}::${e.dtstart}::${feed.source}`;
+if (seen.has(key)) continue;
+seen.add(key);
 
       future.push({
         id:           `ical-${feed.apartment}::${e.dtend}::${feed.source}`,
