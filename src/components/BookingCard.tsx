@@ -97,10 +97,10 @@ export function BookingCard({
   <span
     className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
     style={{
-      background: "rgb(210 100 70 / 0.15)",
-      color: "#e8745a",
-      boxShadow: "0 0 0 1px rgb(210 100 70 / 0.35)",
-    }}
+  background: "rgb(86 176 187 / 0.13)",
+  color: "#56b0bb",
+  boxShadow: "0 0 0 1px rgb(86 176 187 / 0.45)",
+}}
   >
     <AlertTriangle className="h-2.5 w-2.5" aria-hidden />
     Eltérő dátum — ellenőrizd
