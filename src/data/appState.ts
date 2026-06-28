@@ -333,7 +333,7 @@ export function methodLabel(m: PaymentMethod): string {
 export interface DerivedInvoice {
   bookingId: string; apartment: string; amount: string;
   deposit: string; remaining: number;
-  method: PaymentMethod; status: PaymentStatus; displayStatus: "paid" | "pending" | "overdue";
+  method: PaymentMethod; status: PaymentStatus; displayStatus: "paid" | "pending" | "overdue" | "partial";
   arrival: string; departure: string;
 }
 
@@ -342,6 +342,6 @@ export function deriveInvoices(liveBookings: Booking[], paymentData: Record<stri
     .map((b) => {
       const pd = paymentData[b.id] ?? makeEmptyPayment();
       const overdue = pd.status === "pending" && b.status === "departing";
-      return { bookingId: b.id, apartment: b.apartment, amount: pd.amount || "—", deposit: pd.deposit || "", remaining: remainingAmount(pd), method: pd.method, status: pd.status, displayStatus: pd.status === "paid" ? "paid" : overdue ? "overdue" : "pending", arrival: b.arrival, departure: b.departure };
+      return { bookingId: b.id, apartment: b.apartment, amount: pd.amount || "—", deposit: pd.deposit || "", remaining: remainingAmount(pd), method: pd.method, status: pd.status, displayStatus: pd.status === "paid" ? "paid" : overdue ? "overdue" : parseAmount(pd.deposit) > 0 ? "partial" : "pending", arrival: b.arrival, departure: b.departure };
     });
 }
