@@ -313,6 +313,27 @@ for (const list of byApt.values()) {
     }
   }
 }
+  // Csak a jobb prioritású marad, de hasSourceConflict megmarad
+const filteredFuture = future.filter((f, idx) => {
+  const list = byApt.get(f.apartment) ?? [];
+  for (const other of list) {
+    if (other === f) continue;
+    if (other.source === f.source) continue;
+    const aStart = parseIcalDate(f._checkinRaw!);
+    const aEnd   = parseIcalDate(f._checkoutRaw!);
+    const bStart = parseIcalDate(other._checkinRaw!);
+    const bEnd   = parseIcalDate(other._checkoutRaw!);
+    if (aStart < bEnd && bStart < aEnd) {
+      const myPrio = SOURCE_PRIORITY[f.source] ?? 99;
+      const otPrio = SOURCE_PRIORITY[other.source] ?? 99;
+      if (myPrio > otPrio) return false;
+    }
+  }
+  return true;
+});
+
+future.length = 0;
+future.push(...filteredFuture);
   future.sort((a, b) => a._checkinRaw.localeCompare(b._checkinRaw));
   return future;
 }
