@@ -25,8 +25,9 @@ export function ResetPasswordScreen({ onDone }: { onDone: () => void }) {
   }
   return;
 }
-    setSuccess(true);
-    setTimeout(onDone, 2000);
+ await supabase.auth.signOut();
+setSuccess(true);
+setTimeout(onDone, 2000);
   }
 
   const inputCls = "w-full rounded-xl border bg-surface-inset px-4 py-3 pr-12 text-[13px] text-text-primary outline-none input-teal";
