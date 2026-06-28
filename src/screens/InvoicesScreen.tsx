@@ -31,6 +31,13 @@ const displayConfig = {
     border: "rgb(220 132 96 / 0.30)",
     Icon: AlertCircle,
   },
+  partial: {
+    label: "Részben",
+    color: "#e8a84a",
+    bg: "rgb(232 168 74 / 0.15)",
+    border: "rgb(232 168 74 / 0.45)",
+    Icon: Banknote,
+  },
 } as const;
 
 export function InvoicesScreen({ appState, ical }: InvoicesScreenProps) {
