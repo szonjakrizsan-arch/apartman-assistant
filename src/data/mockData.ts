@@ -13,6 +13,7 @@ export interface FutureBooking {
   accent: ApartmentAccent;
 _checkinRaw?:  string;
   _checkoutRaw?: string;
+  hasSourceConflict?: boolean;
 }
 
 export interface StatItem {
