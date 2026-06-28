@@ -6,10 +6,10 @@ X-WR-CALDESC:Szallas.hu reservation calendar
 
 BEGIN:VEVENT
 DTSTART;VALUE=DATE:20260628
-DTEND;VALUE=DATE:20260702
+DTEND;VALUE=DATE:20260705
 SUMMARY:Reserved
-UID:ical-Balazs::20260702::szallas
-DESCRIPTION:Foglalás - Szallas.hu
+UID:ical-Balazs::20260705::szallas
+DESCRIPTION:Foglalás - Szallas.hu — KONFLIKTUS: Airbnb szerint 07.02, Szállás.hu szerint 07.05
 END:VEVENT
 
 BEGIN:VEVENT
@@ -25,7 +25,7 @@ DTSTART;VALUE=DATE:20260709
 DTEND;VALUE=DATE:20260718
 SUMMARY:Reserved
 UID:ical-Balazs::20260718::szallas
-DESCRIPTION:Foglalás - Szallas.hu — KONFLIKTUS: Airbnb szerint 07.15, Szállás.hu szerint 07.18
+DESCRIPTION:Foglalás - Szallas.hu
 END:VEVENT
 
 BEGIN:VEVENT
@@ -41,7 +41,7 @@ DTSTART;VALUE=DATE:20260721
 DTEND;VALUE=DATE:20260728
 SUMMARY:Reserved
 UID:ical-Balazs::20260728::szallas
-DESCRIPTION:Foglalás - Szallas.hu — JÖVŐBELI KONFLIKTUS: Airbnb szerint 07.25, Szállás.hu szerint 07.28
+DESCRIPTION:Foglalás - Szallas.hu
 END:VEVENT
 
 END:VCALENDAR
