@@ -93,15 +93,19 @@ export function BookingCard({
               Bent van
             </span>
           )}
-          {booking.hasSourceConflict && (
-            <span
-              className="inline-flex items-center gap-1 text-[10px] font-medium"
-              style={{ color: "rgb(217 171 78 / 0.55)" }}
-            >
-              <AlertTriangle className="h-2.5 w-2.5" aria-hidden />
-              Eltérő dátum — ellenőrizd
-            </span>
-          )}
+        {booking.hasSourceConflict && (
+  <span
+    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+    style={{
+      background: "rgb(210 100 70 / 0.15)",
+      color: "#e8745a",
+      boxShadow: "0 0 0 1px rgb(210 100 70 / 0.35)",
+    }}
+  >
+    <AlertTriangle className="h-2.5 w-2.5" aria-hidden />
+    Eltérő dátum — ellenőrizd
+  </span>
+)}
         </div>
       )}
 
