@@ -292,7 +292,27 @@ export async function fetchFutureBookings(feeds: FeedConfig[]): Promise<import("
       });
     }
   }
-
+// Kereszt-forrás ütközés detektálás jövőbeli foglalásokra
+const byApt = new Map<string, typeof future>();
+for (const f of future) {
+  if (!byApt.has(f.apartment)) byApt.set(f.apartment, []);
+  byApt.get(f.apartment)!.push(f);
+}
+for (const list of byApt.values()) {
+  for (let i = 0; i < list.length; i++) {
+    for (let j = i + 1; j < list.length; j++) {
+      if (list[i].source === list[j].source) continue;
+      const aStart = parseIcalDate(list[i]._checkinRaw);
+      const aEnd   = parseIcalDate(list[i]._checkoutRaw);
+      const bStart = parseIcalDate(list[j]._checkinRaw);
+      const bEnd   = parseIcalDate(list[j]._checkoutRaw);
+      if (aStart < bEnd && bStart < aEnd && list[i]._checkoutRaw !== list[j]._checkoutRaw) {
+        list[i].hasSourceConflict = true;
+        list[j].hasSourceConflict = true;
+      }
+    }
+  }
+}
   future.sort((a, b) => a._checkinRaw.localeCompare(b._checkinRaw));
   return future;
 }
