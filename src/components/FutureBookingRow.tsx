@@ -68,14 +68,14 @@ export function FutureBookingRow({ booking, onOpen }: FutureBookingRowProps) {
         {/* Conflict badge */}
 {booking.hasSourceConflict && (
   <span
-    className="flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-semibold"
+    className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
     style={{
-      background: "rgb(217 171 78 / 0.15)",
+      background: "rgb(217 171 78 / 0.25)",
       color: "#f0c040",
-      boxShadow: "0 0 0 1px rgb(217 171 78 / 0.55)",
+      boxShadow: "0 0 0 1.5px rgb(217 171 78 / 0.8)",
     }}
   >
-    ⚠
+    ⚠ Ellenőrizd
   </span>
 )}
       </div>
