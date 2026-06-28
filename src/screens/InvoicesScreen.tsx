@@ -38,7 +38,7 @@ const displayConfig = {
     border: "rgb(232 168 74 / 0.45)",
     Icon: Banknote,
   },
-} as const;
+};
 
 export function InvoicesScreen({ appState, ical }: InvoicesScreenProps) {
   const { paymentData, setPayment, getPayment } = appState;
