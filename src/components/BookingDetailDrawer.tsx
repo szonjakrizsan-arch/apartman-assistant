@@ -254,6 +254,11 @@ function handleBackdrop(e: React.MouseEvent) {
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
+  useEffect(() => {
+  function onFocus() { lastFocusTime.current = Date.now(); }
+  window.addEventListener("focus", onFocus);
+  return () => window.removeEventListener("focus", onFocus);
+}, []);
  
   if (!booking) return null;
 
