@@ -196,7 +196,9 @@ export function BookingsScreen({ appState, ical }: BookingsScreenProps) {
                           <BookingCard booking={booking}
                             paymentChecked={isPaymentPaid(booking.id)}
                             onPaymentToggle={() => togglePaymentStatus(booking.id)}
-                            onOpen={() => setOpenBooking(booking)} />
+                            onOpen={() => setOpenBooking(booking)}
+                            paymentDeposit={getPayment(booking.id).deposit}
+                            paymentAmount={getPayment(booking.id).amount} />
                         </li>
                       ))}
                     </ul>
@@ -218,7 +220,9 @@ export function BookingsScreen({ appState, ical }: BookingsScreenProps) {
                       <BookingCard booking={booking}
                         paymentChecked={isPaymentPaid(booking.id)}
                         onPaymentToggle={() => togglePaymentStatus(booking.id)}
-                        onOpen={() => setOpenBooking(booking)} />
+                        onOpen={() => setOpenBooking(booking)}
+                        paymentDeposit={getPayment(booking.id).deposit}
+                        paymentAmount={getPayment(booking.id).amount} />
                     </li>
                   ))}
             </ul>
