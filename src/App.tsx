@@ -13,12 +13,14 @@ import { useAppState }    from "./data/appState";
 import { useIcalBookings } from "./data/useIcalBookings";
 import { useAuth }        from "./hooks/useAuth";
 import type { TabId }     from "./types/navigation";
+import type { Booking }   from "./data/mockData";
 import { useApartments } from "./hooks/useApartments";
 import { ApartmentsScreen } from "./screens/ApartmentsScreen";
 import { supabase } from "./supabaseClient";
 
 export default function App() {
   const [tab, setTab] = useState<TabId>("home");
+  const [openBooking, setOpenBooking] = useState<Booking | null>(null);
   const { user, loading, passwordRecovery, clearRecovery } = useAuth();
   const appState = useAppState(user?.id);
   const { apartments, feeds, addApartment, deleteApartment, addFeed, deleteFeed } = useApartments(user?.id);
@@ -89,7 +91,7 @@ export default function App() {
             <HomeScreen onNavigate={setTab} appState={appState} ical={ical} hasApartments={apartments.length > 0} />
           )}
           <div className={tab === "bookings" ? undefined : "hidden"}>
-            <BookingsScreen appState={appState} ical={ical} />
+            <BookingsScreen appState={appState} ical={ical} openBooking={openBooking} setOpenBooking={setOpenBooking} />
           </div>
           {tab === "tasks" && (
             <TasksScreen appState={appState} ical={ical} />
