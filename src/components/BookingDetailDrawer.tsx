@@ -240,13 +240,7 @@ export function BookingDetailDrawer({
     if (booking) { setNoteOpen(detail.note.length > 0); setContactEditMode(false); }
   }, [booking?.id]);
 
-  const lastFocusTime = useRef(0);
-
-function handleBackdrop(e: React.MouseEvent) {
-  if (e.target !== e.currentTarget) return;
-  if (Date.now() - lastFocusTime.current < 1000) return;
-  onClose();
-}
+ const mouseDownOnBackdrop = useRef(false);
 
   useEffect(() => {
     function handler(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
@@ -254,11 +248,15 @@ function handleBackdrop(e: React.MouseEvent) {
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  useEffect(() => {
-  function onFocus() { lastFocusTime.current = Date.now(); }
-  window.addEventListener("focus", onFocus);
-  return () => window.removeEventListener("focus", onFocus);
-}, []);
+  function handleBackdropMouseDown(e: React.MouseEvent) {
+    mouseDownOnBackdrop.current = e.target === e.currentTarget;
+  }
+
+  function handleBackdropClick(e: React.MouseEvent) {
+    if (e.target !== e.currentTarget) return;
+    if (!mouseDownOnBackdrop.current) return;
+    onClose();
+  }
  
   if (!booking) return null;
 
@@ -296,8 +294,8 @@ function handleBackdrop(e: React.MouseEvent) {
         background: "rgb(0 0 0 / 0.75)",
         backdropFilter: "blur(6px)",
         WebkitBackdropFilter: "blur(6px)",
-      }}
-      onClick={handleBackdrop}
+      }}onMouseDown={handleBackdropMouseDown}
+      onClick={handleBackdropClick}
       aria-modal="true"
       role="dialog"
       aria-label={`${booking.apartment} részletei`}
