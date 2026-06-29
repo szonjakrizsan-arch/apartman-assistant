@@ -244,7 +244,7 @@ export function BookingDetailDrawer({
 
 function handleBackdrop(e: React.MouseEvent) {
   if (e.target !== e.currentTarget) return;
-  if (Date.now() - lastFocusTime.current < 500) return;
+  if (Date.now() - lastFocusTime.current < 1000) return;
   onClose();
 }
 
