@@ -240,7 +240,13 @@ export function BookingDetailDrawer({
     if (booking) { setNoteOpen(detail.note.length > 0); setContactEditMode(false); }
   }, [booking?.id]);
 
-  function handleBackdrop(e: React.MouseEvent) { if (e.target === e.currentTarget) onClose(); }
+  const lastFocusTime = useRef(0);
+
+function handleBackdrop(e: React.MouseEvent) {
+  if (e.target !== e.currentTarget) return;
+  if (Date.now() - lastFocusTime.current < 500) return;
+  onClose();
+}
 
   useEffect(() => {
     function handler(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
