@@ -1,6 +1,7 @@
 import { CalendarDays, ArrowRight, KeyRound, DoorOpen, Moon, Check, AlertTriangle, Home } from "lucide-react";
 import type { Booking } from "../data/mockData";
 import { accentStyles, sourceStyles } from "../lib/theme";
+import { parseAmount } from "../data/appState";
 
 interface BookingCardProps {
   booking: Booking;
