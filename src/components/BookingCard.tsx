@@ -9,6 +9,8 @@ interface BookingCardProps {
   paymentChecked: boolean;
   onPaymentToggle: () => void;
   onOpen: () => void;
+  paymentDeposit?: string;
+  paymentAmount?: string;
 }
 
 export function BookingCard({
@@ -17,6 +19,8 @@ export function BookingCard({
   paymentChecked,
   onPaymentToggle,
   onOpen,
+  paymentDeposit,
+  paymentAmount,
 }: BookingCardProps) {
   const accent = accentStyles[booking.accent];
   const source = sourceStyles[booking.source];
@@ -170,15 +174,15 @@ export function BookingCard({
               }
               aria-label={paymentChecked ? "Fizetés rendben" : "Fizetés ellenőrizendő"}
             >
-              <span
-                className="flex items-center gap-1.5 text-[11px] font-medium"
-                style={{ color: paymentChecked ? "#5abf8a" : "#d26448" }}
-              >
-                {paymentChecked
-                  ? <Check className="h-3 w-3" strokeWidth={2.5} aria-hidden />
-                  : <AlertTriangle className="h-3 w-3" strokeWidth={2} aria-hidden />}
-                Fizetési emlékeztető
-              </span>
+          <span
+  className="flex items-center gap-1.5 text-[11px] font-medium"
+  style={{ color: paymentChecked ? "#5abf8a" : parseAmount(paymentDeposit ?? "") > 0 && parseAmount(paymentAmount ?? "") > 0 ? "#e8a84a" : "#d26448" }}
+>
+  {paymentChecked
+    ? <Check className="h-3 w-3" strokeWidth={2.5} aria-hidden />
+    : <AlertTriangle className="h-3 w-3" strokeWidth={2} aria-hidden />}
+  {paymentChecked ? "Fizetési emlékeztető" : parseAmount(paymentDeposit ?? "") > 0 && parseAmount(paymentAmount ?? "") > 0 ? "Részben fizetve" : "Fizetési emlékeztető"}
+</span>
               <span
                 className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
                 style={
