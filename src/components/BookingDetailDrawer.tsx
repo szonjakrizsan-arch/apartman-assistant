@@ -250,12 +250,16 @@ export function BookingDetailDrawer({
 useEffect(() => {
   if (!booking) return;
   window.history.pushState({ drawer: true }, "");
-  function onPop(e: PopStateEvent) {
-    if (e.state?.drawer) return;
-    onClose();
-  }
+  let userLeft = false;
+  function onBlur() { userLeft = true; }
+  function onFocus() { userLeft = false; }
+  function onPop() { if (!userLeft) onClose(); }
+  window.addEventListener("blur", onBlur);
+  window.addEventListener("focus", onFocus);
   window.addEventListener("popstate", onPop);
   return () => {
+    window.removeEventListener("blur", onBlur);
+    window.removeEventListener("focus", onFocus);
     window.removeEventListener("popstate", onPop);
   };
 }, [booking?.id]);
