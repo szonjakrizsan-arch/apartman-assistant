@@ -13,6 +13,8 @@ type FilterId = "all" | BookingStatus;
 interface BookingsScreenProps {
   appState: AppState & AppStateActions;
   ical:     IcalState;
+  openBooking: Booking | null;
+  setOpenBooking: (b: Booking | null) => void;
 }
 
 const FUTURE_PREVIEW = 3;
@@ -90,10 +92,9 @@ function BookingSkeleton() {
   );
 }
 
-export function BookingsScreen({ appState, ical }: BookingsScreenProps) {
+export function BookingsScreen({ appState, ical, openBooking, setOpenBooking }: BookingsScreenProps) {
   const [activeFilter, setActiveFilter] = useState<FilterId>("all");
   const [showAllFuture, setShowAllFuture] = useState(false);
-  const [openBooking, setOpenBooking] = useState<Booking | null>(null);
 
   const { isPaymentPaid, getPayment, setPayment, togglePaymentStatus,
           getDetail, setDetail, prevCleaningFor } = appState;
