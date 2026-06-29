@@ -247,7 +247,18 @@ export function BookingDetailDrawer({
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
-
+useEffect(() => {
+  if (!booking) return;
+  window.history.pushState({ drawer: true }, "");
+  function onPop(e: PopStateEvent) {
+    if (e.state?.drawer) return;
+    onClose();
+  }
+  window.addEventListener("popstate", onPop);
+  return () => {
+    window.removeEventListener("popstate", onPop);
+  };
+}, [booking?.id]);
  
   if (!booking) return null;
 
