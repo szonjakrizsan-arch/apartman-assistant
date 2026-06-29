@@ -248,17 +248,7 @@ export function BookingDetailDrawer({
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  useEffect(() => {
-    if (!booking) return;
-    window.history.pushState({ drawer: true }, "");
-    function onPop() { onClose(); }
-    window.addEventListener("popstate", onPop);
-    return () => {
-      window.removeEventListener("popstate", onPop);
-      if (window.history.state?.drawer) window.history.back();
-    };
-  }, [booking?.id]);
-  
+ 
   if (!booking) return null;
 
   const accent = accentStyles[booking.accent];
