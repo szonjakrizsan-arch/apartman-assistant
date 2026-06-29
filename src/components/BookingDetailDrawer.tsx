@@ -247,22 +247,7 @@ export function BookingDetailDrawer({
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
-useEffect(() => {
-  if (!booking) return;
-  window.history.pushState({ drawer: true }, "");
-  let userLeft = false;
-  function onBlur() { userLeft = true; }
-  function onFocus() { userLeft = false; }
-  function onPop() { if (!userLeft) onClose(); }
-  window.addEventListener("blur", onBlur);
-  window.addEventListener("focus", onFocus);
-  window.addEventListener("popstate", onPop);
-  return () => {
-    window.removeEventListener("blur", onBlur);
-    window.removeEventListener("focus", onFocus);
-    window.removeEventListener("popstate", onPop);
-  };
-}, [booking?.id]);
+
  
   if (!booking) return null;
 
