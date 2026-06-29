@@ -277,8 +277,7 @@ useEffect(() => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center sm:px-4"
-      style={{
+         style={{
         background: "rgb(0 0 0 / 0.75)",
         backdropFilter: "blur(6px)",
         WebkitBackdropFilter: "blur(6px)",
