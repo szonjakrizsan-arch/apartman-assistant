@@ -88,9 +88,9 @@ export default function App() {
           {tab === "home" && (
             <HomeScreen onNavigate={setTab} appState={appState} ical={ical} hasApartments={apartments.length > 0} />
           )}
-          {tab === "bookings" && (
+          <div className={tab === "bookings" ? undefined : "hidden"}>
             <BookingsScreen appState={appState} ical={ical} />
-          )}
+          </div>
           {tab === "tasks" && (
             <TasksScreen appState={appState} ical={ical} />
           )}
