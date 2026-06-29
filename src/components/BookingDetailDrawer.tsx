@@ -240,23 +240,11 @@ export function BookingDetailDrawer({
     if (booking) { setNoteOpen(detail.note.length > 0); setContactEditMode(false); }
   }, [booking?.id]);
 
- const mouseDownOnBackdrop = useRef(false);
-
-  useEffect(() => {
+useEffect(() => {
     function handler(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
-
-  function handleBackdropMouseDown(e: React.MouseEvent) {
-    mouseDownOnBackdrop.current = e.target === e.currentTarget;
-  }
-
-  function handleBackdropClick(e: React.MouseEvent) {
-    if (e.target !== e.currentTarget) return;
-    if (!mouseDownOnBackdrop.current) return;
-    onClose();
-  }
  
   if (!booking) return null;
 
@@ -294,8 +282,7 @@ export function BookingDetailDrawer({
         background: "rgb(0 0 0 / 0.75)",
         backdropFilter: "blur(6px)",
         WebkitBackdropFilter: "blur(6px)",
-      }}onMouseDown={handleBackdropMouseDown}
-      onClick={handleBackdropClick}
+      }}
       aria-modal="true"
       role="dialog"
       aria-label={`${booking.apartment} részletei`}
