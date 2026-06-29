@@ -492,15 +492,19 @@ export function BookingDetailDrawer({
                     onClick={() => onPaymentChange({ ...payment, status: payment.status === "paid" ? "pending" : "paid" })}
                     className="pressable flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold transition-soft"
                     style={paymentPaid
-                      ? { background: "rgb(90 191 138 / 0.16)", color: GREEN.text, outline: `1px solid ${GREEN.border}` }
-                      : { background: CORAL.bg, color: CORAL.text, boxShadow: CORAL.glow }
-                    }
+  ? { background: "rgb(90 191 138 / 0.16)", color: GREEN.text, outline: `1px solid ${GREEN.border}` }
+  : parseAmount(payment.deposit) > 0 && parseAmount(payment.amount) > 0
+    ? { background: "rgb(232 168 74 / 0.15)", color: "#e8a84a", outline: "1px solid rgb(232 168 74 / 0.45)" }
+    : { background: CORAL.bg, color: CORAL.text, boxShadow: CORAL.glow }
+}
                     aria-label={paymentPaid ? "Fizetve — koppints a visszaállításhoz" : "Függőben — koppints a megerősítéshez"}
                   >
                     {paymentPaid
-                      ? <><Check className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden /> Fizetve</>
-                      : <><AlertTriangle className="h-3.5 w-3.5" strokeWidth={2} aria-hidden /> Függőben</>
-                    }
+  ? <><Check className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden /> Fizetve</>
+  : parseAmount(payment.deposit) > 0 && parseAmount(payment.amount) > 0
+    ? <><AlertTriangle className="h-3.5 w-3.5" strokeWidth={2} aria-hidden /> Részben fizetve</>
+    : <><AlertTriangle className="h-3.5 w-3.5" strokeWidth={2} aria-hidden /> Függőben</>
+}
                   </button>
                 </div>
               </div>
