@@ -26,9 +26,9 @@ export function useAuth(): AuthState {
       if (recovering && session?.user) {
         setPasswordRecovery(true);
         setUser(session.user);
-      } else {
-        setUser(session?.user ?? null);
-      }
+      } else if (event !== "TOKEN_REFRESHED") {
+          setUser(session?.user ?? null);
+        }
       setLoading(false);
     });
 
