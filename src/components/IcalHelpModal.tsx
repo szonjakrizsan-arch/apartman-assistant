@@ -373,7 +373,159 @@ function ExpediaContent() {
     </div>
   );
 }
+/* ─── Plain text export ─────────────────────────────────────────── */
+const TAB_TEXT: Record<string, string> = {
+  elso: `APARTMAN ASSISTANT – iCal beállítási útmutató
+Első lépések
+============
 
+Mi az az iCal?
+Az iCal egy internetes naptárkapcsolat. Segítségével a különböző foglalási oldalak (pl. Booking.com vagy Airbnb) automatikusan meg tudják osztani foglalási naptárukat az Apartman Assistanttal — így nem kell kézzel felírnod a vendégek adatait.
+
+Mielőtt elkezded:
+- Egy Apartman Assistant fiók
+- Legalább egy apartman hozzáadva
+- A foglalási oldalról kimásolt iCal hivatkozás
+
+iCal hivatkozás hozzáadása az apphoz:
+1. Koppints az + Új apartman hozzáadása gombra.
+2. Írd be az apartman nevét, majd válassz egy színt. Koppints a Hozzáadás gombra.
+3. Az apartman megjelenik a listában. Koppints a jobb oldalon lévő lefelé mutató nyílra.
+4. Koppints az + iCal feed hozzáadása gombra.
+5. Válaszd ki a foglalási szolgáltatót (Airbnb, Booking.com, Szállás.hu stb.).
+6. Illeszd be az iCal URL mezőbe a kimásolt hivatkozást (https://...). Koppints a Mentés gombra.
+7. Ha több foglalási oldalt használsz, ismételd meg a 4–6. lépéseket minden szolgáltatóhoz.
+
+Jó tudni: A foglalások nem mindig jelennek meg azonnal — az új foglalás megjelenési ideje a foglalási szolgáltatótól függ. Ez teljesen normális.`,
+
+  airbnb: `APARTMAN ASSISTANT – iCal beállítási útmutató
+Airbnb
+======
+
+Szükséges: Airbnb házigazdai fiók + hozzáférés a szálláshelyhez
+
+1. Nyisd meg az airbnb.com oldalt, és jelentkezz be a fiókodba.
+2. A jobb felső sarokban kattints a Házigazdai teendők gombra. Ha nem látod, válaszd a Váltás a vendégfogadásra lehetőséget.
+3. A felső menüsorban kattints a Hirdetések menüpontra.
+4. Kattints arra a szálláshelyre, amelyet össze szeretnél kapcsolni.
+5. A szálláshely adatlapján kattints az Árazás és elérhetőség fülre.
+6. Görgess le, amíg meg nem találod a Naptárszinkronizálás részt.
+7. Kattints a Naptár exportálása lehetőségre.
+8. Másold ki a megjelenő hivatkozást — ez az iCal URL.
+9. Térj vissza az Apartman Assistantba, és add hozzá ezt a hivatkozást az Airbnb feednél.
+
+Jó tudni: Az Airbnb felülete időnként változhat. Ha egy menüpont máshol jelenik meg, keresd ugyanazt a funkciót az aktuális felületen.`,
+
+  booking: `APARTMAN ASSISTANT – iCal beállítási útmutató
+Booking.com
+===========
+
+Szükséges: Booking.com szállásadói fiók + Extranet hozzáférés
+
+1. Nyisd meg a booking.com oldalt, és jelentkezz be a szállásadói fiókoddal.
+2. A sikeres bejelentkezés után nyisd meg a Booking.com Extranetet.
+3. Az Extranet főmenüjében keresd meg a Szoba és elérhetőség vagy Naptár menüpontot.
+4. Nyisd meg a Naptárszinkronizálás (iCal sync / Calendar sync) részt.
+5. Keresd meg az iCal exportálás / Naptár exportálása lehetőséget.
+6. Másold ki a megjelenő hivatkozást — ez az iCal URL.
+7. Térj vissza az Apartman Assistantba, és add hozzá ezt a hivatkozást a Booking.com feednél.
+
+Jó tudni: A Booking.com Extranet felülete időnként változhat. Ha egy menüpont máshol jelenik meg, keresd ugyanazt a funkciót az aktuális felületen.`,
+
+  szallas: `APARTMAN ASSISTANT – iCal beállítási útmutató
+Szállás.hu
+==========
+
+Szükséges: Szállás.hu Partner fiók + hozzáférés a szálláshelyhez
+
+1. Nyisd meg a szallas.hu oldalt, és jelentkezz be a Partner Portálra.
+2. A főmenüben keresd meg az Árak és kapacitás menüpontot, majd kattints rá.
+3. A megjelenő lehetőségek közül válaszd a Naptár szinkron (iCal) menüpontot.
+4. Ha több apartmant kezelsz, válaszd ki a megfelelőt.
+5. Kattints a Naptár exportálása gombra.
+6. Kattints a Link másolása gombra, vagy másold ki a megjelenő hivatkozást.
+7. Térj vissza az Apartman Assistantba, és add hozzá ezt a hivatkozást a Szállás.hu feednél.
+
+Jó tudni: A Szállás.hu időről időre módosíthatja a Partner Portál felépítését. Ha egy menüpont máshol jelenik meg, keresd ugyanazt a funkciót az aktuális felületen.`,
+
+  google: `APARTMAN ASSISTANT – iCal beállítási útmutató
+Google Naptár
+=============
+
+Szükséges: Google-fiók + foglalási naptár Google Naptárban • Csak számítógépen
+
+1. Nyisd meg a calendar.google.com oldalt, és jelentkezz be.
+2. A bal oldalon, a Saját naptárak részben keresd meg a szálláshelyedhez használt naptárat.
+3. Vidd az egérmutatót a naptár neve fölé, majd kattints a három függőleges pontra.
+4. Válaszd a Beállítások és megosztás lehetőséget.
+5. A bal oldali menüben keresd meg a Naptár integrálása menüpontot.
+6. Keresd meg a Titkos cím iCal formátumban részt.
+7. Kattints a Másolás ikonra, vagy másold ki a teljes hivatkozást.
+8. Térj vissza az Apartman Assistantba, és add hozzá ezt a hivatkozást a Google Naptár feednél.
+
+Jó tudni: A Google időről időre módosíthatja a Naptár felépítését. Ha egy menüpont máshol jelenik meg, keresd ugyanazt a funkciót az aktuális felületen.`,
+
+  vrbo: `APARTMAN ASSISTANT – iCal beállítási útmutató
+VRBO
+====
+
+Szükséges: VRBO szállásadói fiók + hozzáférés a szálláshelyhez
+
+1. Nyisd meg a vrbo.com oldalt, és jelentkezz be a szállásadói fiókodba (Owner Dashboard).
+2. Ha több ingatlant kezelsz, válaszd ki a megfelelőt.
+3. A bal oldali menüben kattints a Naptár (Calendar) menüpontra.
+4. Keresd meg az Importálás és Exportálás (Import & Export) lehetőséget.
+5. Kattints a Naptár exportálása (Export calendar) lehetőségre.
+6. Kattints az URL másolása (Copy URL) gombra.
+7. Térj vissza az Apartman Assistantba, és add hozzá ezt a hivatkozást a VRBO feednél.
+
+Figyelem: A VRBO felületén előfordulhat egy "Include tentative reservations" jelölőnégyzet. Ha az Apartman Assistanthoz használod az iCal hivatkozást, hagyd ezt kikapcsolva.`,
+
+  tripadvisor: `APARTMAN ASSISTANT – iCal beállítási útmutató
+TripAdvisor
+===========
+
+Szükséges: TripAdvisor Rentals tulajdonosi fiók + hozzáférés a szálláshelyhez
+
+1. Nyisd meg a tripadvisor.com/rentals oldalt, és jelentkezz be a tulajdonosi fiókodba.
+2. Ha több szálláshelyet kezelsz, válaszd ki a megfelelőt.
+3. A felső menüsorban kattints a Naptár (Calendar) fülre.
+4. Keresd meg a Naptár exportálása (Export calendar) gombot (általában jobb oldalt vagy felül).
+5. Kattints a Link másolása (Copy Link / Copy to clipboard) gombra.
+6. Térj vissza az Apartman Assistantba, és add hozzá ezt a hivatkozást a TripAdvisor feednél.
+
+Jó tudni: A TripAdvisor Rentals felülete időről időre módosulhat. Ha egy menüpont máshol jelenik meg, keresd ugyanazt a funkciót az aktuális felületen.`,
+
+  expedia: `APARTMAN ASSISTANT – iCal beállítási útmutató
+Expedia
+=======
+
+Figyelem: Az Expedia Partner Central felületén nem minden szálláshely esetében érhető el az iCal exportálás.
+
+Szükséges: Expedia Partner Central fiók + hozzáférés a szálláshelyhez
+
+1. Nyisd meg az expediapartnercentral.com oldalt, és jelentkezz be.
+2. A főmenüben keresd meg a Szobák és árak (Rooms and Rates) menüpontot.
+3. Válaszd a Szobatípusok és ártervek (Room types and Rate plans) menüpontot.
+4. Keresd meg a Naptárak összekapcsolása (Connect calendars) lehetőséget.
+5. Ha több szobát kezelsz, válaszd ki a megfelelő szálláshelyet.
+6. Görgess az Expedia Group naptár exportálása részhez, majd kattints a Link létrehozása (Create link) gombra.
+7. Másold ki a létrehozott hivatkozást.
+8. Térj vissza az Apartman Assistantba, és add hozzá ezt a hivatkozást az Expedia feednél.
+
+Figyelem: Ha a "Naptárak összekapcsolása" menüpont nem jelenik meg, az Expedia az adott szálláshelyhez Channel Manager rendszert vár — iCal exportálás nem elérhető.`,
+};
+
+function downloadTxt(tabId: string, label: string) {
+  const text = TAB_TEXT[tabId] ?? "";
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `ical-utmutato-${label.toLowerCase().replace(/[^a-z0-9]/g, "-")}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 /* ─── Content router ────────────────────────────────────────────── */
 function TabContent({ tabId }: { tabId: string }) {
   switch (tabId) {
@@ -395,8 +547,9 @@ interface IcalHelpModalProps {
 }
 
 export function IcalHelpModal({ onClose }: IcalHelpModalProps) {
-  const [activeTab, setActiveTab] = useState("elso");
+const [activeTab, setActiveTab] = useState("elso");
   const active = TABS.find(t => t.id === activeTab)!;
+  const activeIndex = TABS.findIndex(t => t.id === activeTab);
 
   return (
     <div
@@ -420,6 +573,14 @@ export function IcalHelpModal({ onClose }: IcalHelpModalProps) {
             </div>
             <button
               type="button"
+              onClick={() => downloadTxt(activeTab, active.label)}
+              className="pressable flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-soft"
+              style={{ background: "rgb(86 176 187 / 0.12)", color: "#7dd4dd", outline: "1px solid rgb(86 176 187 / 0.30)" }}
+            >
+              ⬇ Mentés .txt
+            </button>
+            <button
+              type="button"
               onClick={onClose}
               className="pressable flex h-8 w-8 items-center justify-center rounded-full transition-soft"
               style={{ background: CORAL.bg, boxShadow: CORAL.glow }}
@@ -429,26 +590,46 @@ export function IcalHelpModal({ onClose }: IcalHelpModalProps) {
             </button>
           </div>
 
-          {/* ── Tab bar ── */}
-          <div className="mt-4 flex gap-2 overflow-x-auto pb-1 scrollbar-none" style={{ scrollbarWidth: "none" }}>
-            {TABS.map((tab) => {
-              const isActive = tab.id === activeTab;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className="pressable shrink-0 flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-soft"
-                  style={isActive
-                    ? { background: tab.activeBg, color: tab.activeText, outline: `1px solid ${tab.activeBorder}` }
-                    : { background: "rgb(38 46 44 / 0.60)", color: T.secondary, outline: `1px solid ${TEAL.border}` }
-                  }
-                >
-                  <span>{tab.emoji}</span>
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
+ {/* ── Tab bar ── */}
+          <div className="mt-4 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab(TABS[Math.max(0, activeIndex - 1)].id)}
+              disabled={activeIndex === 0}
+              className="pressable shrink-0 flex h-7 w-7 items-center justify-center rounded-full transition-soft"
+              style={{ background: "rgb(38 46 44 / 0.80)", color: activeIndex === 0 ? "rgb(86 176 187 / 0.25)" : T.secondary, outline: `1px solid ${TEAL.border}` }}
+            >
+              ‹
+            </button>
+            <div className="flex-1 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+              {TABS.map((tab) => {
+                const isActive = tab.id === activeTab;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className="pressable shrink-0 flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-soft"
+                    style={isActive
+                      ? { background: tab.activeBg, color: tab.activeText, outline: `1px solid ${tab.activeBorder}` }
+                      : { background: "rgb(38 46 44 / 0.60)", color: T.secondary, outline: `1px solid ${TEAL.border}` }
+                    }
+                  >
+                    <span>{tab.emoji}</span>
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab(TABS[Math.min(TABS.length - 1, activeIndex + 1)].id)}
+              disabled={activeIndex === TABS.length - 1}
+              className="pressable shrink-0 flex h-7 w-7 items-center justify-center rounded-full transition-soft"
+              style={{ background: "rgb(38 46 44 / 0.80)", color: activeIndex === TABS.length - 1 ? "rgb(86 176 187 / 0.25)" : T.secondary, outline: `1px solid ${TEAL.border}` }}
+            >
+              ›
+            </button>
           </div>
         </div>
 
