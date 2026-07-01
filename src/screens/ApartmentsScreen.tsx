@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { IcalHelpModal } from "../components/IcalHelpModal";
 import { Plus, Trash2, Link, ChevronDown, ChevronUp } from "lucide-react";
 import { SectionHeader } from "../components/SectionHeader";
 import { useApartments } from "../hooks/useApartments";
@@ -50,6 +51,7 @@ export function ApartmentsScreen({ userId, shared }: ApartmentsScreenProps) {
   const [newUrl, setNewUrl]       = useState("");
   const [addingFeedFor, setAddingFeedFor] = useState<string | null>(null);
   const [legalDoc, setLegalDoc] = useState<LegalDoc | null>(null);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   async function handleAddApartment() {
     if (!newName.trim()) return;
@@ -69,6 +71,27 @@ export function ApartmentsScreen({ userId, shared }: ApartmentsScreenProps) {
   return (
     <div className="flex flex-col gap-5 pb-2">
       <SectionHeader title="Apartmanok" subtitle={`${apartments.length} apartman`} />
+
+      {/* iCal segítség gomb */}
+      <button
+        type="button"
+        onClick={() => setShowHelpModal(true)}
+        className="pressable flex w-full items-center justify-between rounded-2xl px-5 py-4 transition-soft"
+        style={{
+          background: "rgb(86 176 187 / 0.08)",
+          border: "1px solid rgb(86 176 187 / 0.30)",
+          boxShadow: "0 0 16px rgb(86 176 187 / 0.06)",
+        }}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">📋</span>
+          <div className="text-left">
+            <p className="text-[14px] font-semibold" style={{ color: "#7dd4dd" }}>Hogyan adjak hozzá iCal feedet?</p>
+            <p className="text-[12px] mt-0.5" style={{ color: "#C8D4D0" }}>Airbnb, Booking.com, Szállás.hu és más platformok</p>
+          </div>
+        </div>
+        <span className="text-[20px]">→</span>
+      </button>
   
       {/* Apartman lista */}
       {apartments.length === 0 ? (
@@ -228,6 +251,7 @@ export function ApartmentsScreen({ userId, shared }: ApartmentsScreenProps) {
         <button type="button" onClick={() => setLegalDoc("contact")}
           className="text-[11px] text-text-muted hover:text-text-secondary transition-soft">Impresszum</button>
       </div>
+ {showHelpModal && <IcalHelpModal onClose={() => setShowHelpModal(false)} />}
     </div>
   );
 }
