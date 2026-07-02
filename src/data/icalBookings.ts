@@ -241,7 +241,7 @@ export async function fetchAllBookings(
       isTodayArrival:   false,
       isTodayDeparture: true,
       paymentStatus:    "pending",
-      hasSourceConflict: conflictedApartments.has(kb.apartment),
+      hasSourceConflict: false,
       _uid:          stableKey,
       _summary:      "",
       _checkinRaw:   kb.firstCheckin,
