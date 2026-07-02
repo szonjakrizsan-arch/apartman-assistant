@@ -112,8 +112,9 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
       for (let j = i + 1; j < list.length; j++) {
         if (!rangesOverlap(list[i], list[j])) continue;
 
-        const sameCheckout = list[i]._checkoutRaw === list[j]._checkoutRaw;
-       if (!sameCheckout) {
+const sameCheckout = list[i]._checkoutRaw === list[j]._checkoutRaw;
+        const sameCheckin  = list[i]._checkinRaw  === list[j]._checkinRaw;
+       if (!sameCheckout && sameCheckin) {
   const iPrio = SOURCE_PRIORITY[list[i].source] ?? 99;
   const jPrio = SOURCE_PRIORITY[list[j].source] ?? 99;
   if (iPrio <= jPrio) {
