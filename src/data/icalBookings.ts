@@ -90,7 +90,7 @@ function rangesOverlap(a: Booking, b: Booking): boolean {
   const aEnd   = parseIcalDate(a._checkoutRaw!);
   const bStart = parseIcalDate(b._checkinRaw!);
   const bEnd   = parseIcalDate(b._checkoutRaw!);
-  return aStart < bEnd && bStart < aEnd;
+  return aStart < bEnd && bStart < aEnd && aEnd.getTime() !== bStart.getTime() && bEnd.getTime() !== aStart.getTime();
 }
 
 const CONFLICT_THRESHOLD_DAYS = 999;
