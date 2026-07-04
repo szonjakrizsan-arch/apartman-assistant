@@ -219,7 +219,7 @@ export async function fetchAllBookings(
     bookings.filter(b => b.hasSourceConflict).map(b => b.apartment)
   );
 
-  /* ── 3. Feltámasztás a feedből eltűnt, de ma még távozó foglalásoknak ── */
+/* ── 3. Feltámasztás a feedből eltűnt, de ma még távozó foglalásoknak ── */
   const today = todayUTC();
   for (const stableKey in knownBookings) {
     if (seenStableKeys.has(stableKey)) continue;
@@ -228,6 +228,18 @@ export async function fetchAllBookings(
     const checkout = parseIcalDate(kb.lastCheckout);
     const checkin  = parseIcalDate(kb.firstCheckin);
     if (checkout.getTime() !== today.getTime()) continue;
+
+    // Ne támasszuk fel, ha ugyanerre az apartmanra már van élő,
+    // a mai napot lefedő foglalás a friss feedből (pl. a vendég
+    // módosította/meghosszabbította a foglalást).
+    const hasLiveCoverageToday = bookings.some((b) => {
+      if (b.apartment !== kb.apartment) return false;
+      const bCheckin  = parseIcalDate(b._checkinRaw!);
+      const bCheckout = parseIcalDate(b._checkoutRaw!);
+      return bCheckin <= today && today <= bCheckout;
+    });
+    if (hasLiveCoverageToday) continue;
+
     const nights = daysBetween(checkin, checkout);
 
     bookings.push({
