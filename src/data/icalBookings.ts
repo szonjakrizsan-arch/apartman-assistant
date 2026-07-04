@@ -264,6 +264,15 @@ export async function fetchAllBookings(
     } as Booking);
   }
 
+/* ── 4. Végső védőháló: egy apartman ne szerepelhessen egyszerre ──
+   *    élő ÉS feltámasztott (szellem) állapotban.                    */
+  const apartmentsWithLiveCoverage = new Set(
+    bookings.filter((b) => b._isActiveRaw).map((b) => b.apartment)
+  );
+  bookings = bookings.filter(
+    (b) => b._isActiveRaw || !apartmentsWithLiveCoverage.has(b.apartment)
+  );
+
   const ORDER: BookingStatus[] = ["arriving", "staying", "departing"];
   bookings.sort((a, b) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status));
 
