@@ -80,21 +80,38 @@ export function ContactsScreen({ appState, ical, userId }: ContactsScreenProps) 
     const meta = bookingMeta.get(bookingId);
     if (meta) {
       contactMap.get(key)!.bookings.push(meta);
-    } else {
-      /* A foglalás már nincs a feedben — rekonstruáljuk a booking_id-ből.
-         Formátum: "ical-Korvett::20260621::szallas" */
-      const parts = bookingId.replace(/^ical-/, "").split("::");
-      const apartment = parts[0] ?? "";
-      const year      = (parts[1] ?? "").slice(0, 4);
-      if (apartment) {
-        contactMap.get(key)!.bookings.push({
-          arrival:   "korábbi foglalás",
-          departure: "",
-          apartment,
-          year,
-        });
-      }
+} else {
+  /* A foglalás már nincs a feedben — rekonstruáljuk a booking_id-ből.
+     Kétféle formátum létezik:
+     1) "ical-Korvett::20260621::szallas"      (apartman névvel)
+     2) "4970365-20260611-20260614@szallas.hu" (Szállás.hu natív ID, apartman név nélkül) */
+  const stripped = bookingId.replace(/^ical-/, "");
+
+  if (stripped.includes("::")) {
+    const parts = stripped.split("::");
+    const apartment = parts[0] ?? "";
+    const year      = (parts[1] ?? "").slice(0, 4);
+    if (apartment) {
+      contactMap.get(key)!.bookings.push({
+        arrival:   "korábbi foglalás",
+        departure: "",
+        apartment,
+        year,
+      });
     }
+  } else if (stripped.includes("@szallas.hu")) {
+    /* Natív Szállás.hu ID — az apartman neve nincs benne kódolva,
+       de az évet ki tudjuk olvasni a dátumból. */
+    const match = stripped.match(/-(\d{8})-/);
+    const year  = match ? match[1].slice(0, 4) : "";
+    contactMap.get(key)!.bookings.push({
+      arrival:   "korábbi foglalás",
+      departure: "",
+      apartment: "Szállás.hu foglalás",
+      year,
+    });
+  }
+}
   }
 
   const guestContacts = Array.from(contactMap.values()).sort((a, b) =>
