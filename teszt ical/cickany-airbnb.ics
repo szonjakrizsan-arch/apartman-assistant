@@ -3,7 +3,6 @@ VERSION:2.0
 PRODID:-//Airbnb Inc//Hosting Calendar 0.8.1.5//EN
 X-WR-CALNAME:Cickány - Airbnb
 X-WR-CALDESC:Airbnb reservation calendar
-
 BEGIN:VEVENT
 DTSTART;VALUE=DATE:20260628
 DTEND;VALUE=DATE:20260703
@@ -11,7 +10,6 @@ SUMMARY:Reserved
 UID:airbnb-cickany-001@airbnb.com
 DESCRIPTION:Reservation - Airbnb
 END:VEVENT
-
 BEGIN:VEVENT
 DTSTART;VALUE=DATE:20260703
 DTEND;VALUE=DATE:20260708
@@ -19,7 +17,13 @@ SUMMARY:Reserved
 UID:airbnb-cickany-002@airbnb.com
 DESCRIPTION:Reservation - Airbnb
 END:VEVENT
-
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260705
+DTEND;VALUE=DATE:20260710
+SUMMARY:Reserved
+UID:airbnb-cickany-ghost-test@airbnb.com
+DESCRIPTION:TESZT - szellem foglalás, ma érkezne
+END:VEVENT
 BEGIN:VEVENT
 DTSTART;VALUE=DATE:20260710
 DTEND;VALUE=DATE:20260714
@@ -27,7 +31,6 @@ SUMMARY:Reserved
 UID:airbnb-cickany-003@airbnb.com
 DESCRIPTION:Reservation - Airbnb
 END:VEVENT
-
 BEGIN:VEVENT
 DTSTART;VALUE=DATE:20260717
 DTEND;VALUE=DATE:20260722
@@ -35,5 +38,4 @@ SUMMARY:Reserved
 UID:airbnb-cickany-004@airbnb.com
 DESCRIPTION:Reservation - Airbnb
 END:VEVENT
-
 END:VCALENDAR
