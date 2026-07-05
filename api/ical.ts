@@ -54,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const text = await upstream.text();
 
     res.setHeader("Content-Type", "text/calendar; charset=utf-8");
-    res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=60");
+    res.setHeader("Cache-Control", "s-maxage=10, stale-while-revalidate=5");
     res.setHeader("Access-Control-Allow-Origin", "*");
     return res.status(upstream.status).send(text);
   } catch (err) {
