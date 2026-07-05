@@ -91,7 +91,6 @@ function normalizeEvent(
 }
 
 function rangesOverlap(a: Booking, b: Booking): boolean {
-  if (a.source === b.source) return false;
   const aStart = parseIcalDate(a._checkinRaw!);
   const aEnd   = parseIcalDate(a._checkoutRaw!);
   const bStart = parseIcalDate(b._checkinRaw!);
@@ -116,28 +115,27 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
 
     for (let i = 0; i < list.length; i++) {
       for (let j = i + 1; j < list.length; j++) {
-        if (!rangesOverlap(list[i], list[j])) continue;
+ if (!rangesOverlap(list[i], list[j])) continue;
 
-const sameCheckout = list[i]._checkoutRaw === list[j]._checkoutRaw;
+        const sameCheckout = list[i]._checkoutRaw === list[j]._checkoutRaw;
         const sameCheckin  = list[i]._checkinRaw  === list[j]._checkinRaw;
-       if (!sameCheckout && sameCheckin) {
-  const iPrio = SOURCE_PRIORITY[list[i].source] ?? 99;
-  const jPrio = SOURCE_PRIORITY[list[j].source] ?? 99;
-  if (iPrio <= jPrio) {
-    toKeep.add(i);
-  } else {
-    toKeep.add(j);
-  }
-  trueConflicts.add(i);
-  trueConflicts.add(j);
-} else {
-          const iPrio = SOURCE_PRIORITY[list[i].source] ?? 99;
-          const jPrio = SOURCE_PRIORITY[list[j].source] ?? 99;
-          if (iPrio <= jPrio) {
-            toKeep.add(i);
-          } else {
-            toKeep.add(j);
-          }
+        const isIdenticalBooking = sameCheckout && sameCheckin;
+
+        const iPrio = SOURCE_PRIORITY[list[i].source] ?? 99;
+        const jPrio = SOURCE_PRIORITY[list[j].source] ?? 99;
+        if (iPrio <= jPrio) {
+          toKeep.add(i);
+        } else {
+          toKeep.add(j);
+        }
+
+        // Csak akkor NEM jelzünk ütközést, ha a két bejegyzés pontosan
+        // ugyanaz a foglalás, szinkronizálva két platformra (azonos
+        // check-in ÉS check-out). Minden más átfedés — akár azonos, akár
+        // különböző forrásból — valódi ütközés-gyanús, jelezni kell.
+        if (!isIdenticalBooking) {
+          trueConflicts.add(i);
+          trueConflicts.add(j);
         }
       }
     }
