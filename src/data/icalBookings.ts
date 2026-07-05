@@ -327,12 +327,14 @@ for (const f of future) {
 for (const list of byApt.values()) {
   for (let i = 0; i < list.length; i++) {
     for (let j = i + 1; j < list.length; j++) {
-      if (list[i].source === list[j].source) continue;
       const aStart = parseIcalDate(list[i]._checkinRaw);
       const aEnd   = parseIcalDate(list[i]._checkoutRaw);
       const bStart = parseIcalDate(list[j]._checkinRaw);
       const bEnd   = parseIcalDate(list[j]._checkoutRaw);
-      if (aStart < bEnd && bStart < aEnd && list[i]._checkoutRaw !== list[j]._checkoutRaw) {
+      const sameCheckin     = list[i]._checkinRaw  === list[j]._checkinRaw;
+      const sameCheckout    = list[i]._checkoutRaw === list[j]._checkoutRaw;
+      const isIdenticalBooking = sameCheckin && sameCheckout;
+      if (aStart < bEnd && bStart < aEnd && !isIdenticalBooking) {
         list[i].hasSourceConflict = true;
         list[j].hasSourceConflict = true;
       }
@@ -344,7 +346,9 @@ const filteredFuture = future.filter((f, idx) => {
   const list = byApt.get(f.apartment) ?? [];
   for (const other of list) {
     if (other === f) continue;
-    if (other.source === f.source) continue;
+    const sameCheckin  = f._checkinRaw  === other._checkinRaw;
+    const sameCheckout = f._checkoutRaw === other._checkoutRaw;
+    if (sameCheckin && sameCheckout) continue; // azonos foglalás két platformon, nem valódi ütközés
     const aStart = parseIcalDate(f._checkinRaw!);
     const aEnd   = parseIcalDate(f._checkoutRaw!);
     const bStart = parseIcalDate(other._checkinRaw!);
