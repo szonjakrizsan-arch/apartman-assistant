@@ -14,10 +14,10 @@ END:VEVENT
 
 BEGIN:VEVENT
 DTSTART;VALUE=DATE:20260703
-DTEND;VALUE=DATE:20260708
+DTEND;VALUE=DATE:20260710
 SUMMARY:Reserved
-UID:ical-Cickany::20260708::szallas
-DESCRIPTION:Foglalás - Szallas.hu
+UID:ical-Cickany::20260710::szallas
+DESCRIPTION:TESZT — 4. pont (több apartman egyszerre): KONFLIKTUS: Airbnb szerint 07.08, Szállás.hu szerint 07.10
 END:VEVENT
 
 BEGIN:VEVENT
