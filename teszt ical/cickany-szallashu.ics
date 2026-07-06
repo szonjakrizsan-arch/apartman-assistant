@@ -13,11 +13,11 @@ DESCRIPTION:TRUNCATE SZIMULÁCIÓ: ez a foglalás 07.01-én kezdődött, de Szá
 END:VEVENT
 
 BEGIN:VEVENT
-DTSTART;VALUE=DATE:20260703
+DTSTART;VALUE=DATE:20260706
 DTEND;VALUE=DATE:20260710
 SUMMARY:Reserved
 UID:ical-Cickany::20260710::szallas
-DESCRIPTION:TESZT — 4. pont (több apartman egyszerre): KONFLIKTUS: Airbnb szerint 07.08, Szállás.hu szerint 07.10
+DESCRIPTION:TESZT — 4. pont (több apartman egyszerre): KONFLIKTUS: Airbnb 07.03–07.08, Szállás.hu 07.06–07.10 (átfedés)
 END:VEVENT
 
 BEGIN:VEVENT
