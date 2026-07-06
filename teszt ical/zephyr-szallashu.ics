@@ -29,11 +29,11 @@ DESCRIPTION:TESZT — 4. pont (több apartman egyszerre): KONFLIKTUS: Airbnb sze
 END:VEVENT
 
 BEGIN:VEVENT
-DTSTART;VALUE=DATE:20260714
-DTEND;VALUE=DATE:20260719
+DTSTART;VALUE=DATE:20260716
+DTEND;VALUE=DATE:20260721
 SUMMARY:Reserved
-UID:ical-Zephyr::20260719::szallas
-DESCRIPTION:Foglalás - Szallas.hu
+UID:ical-Zephyr::20260721::szallas
+DESCRIPTION:TESZT — 5. pont (klasszikus dupla-foglalás): Airbnb szerint 07.14–07.19, Szállás.hu szerint 07.16–07.21 (mindkét dátum eltér)
 END:VEVENT
 
 BEGIN:VEVENT
