@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Szallas.hu//Reservation Calendar//HU
+X-WR-CALNAME:Egyszeres - Szállás.hu
+X-WR-CALDESC:Szallas.hu reservation calendar
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260706
+DTEND;VALUE=DATE:20260712
+SUMMARY:Reserved
+UID:ical-Egyszeres::20260712::szallas
+DESCRIPTION:TESZT — 6. pont: a vendég valójában már napok óta itt van, de a Szállás.hu feed mindig a mai napra csonkítja a kezdő dátumot.
+END:VEVENT
+
+END:VCALENDAR
