@@ -246,7 +246,7 @@ export async function fetchAllBookings(
 
     const nights = daysBetween(checkin, checkout);
 
-    bookings.push({
+ bookings.push({
       id:               `ical-${stableKey}`,
       apartment:        kb.apartment,
       accent:           kb.accent as Booking["accent"],
@@ -264,17 +264,22 @@ export async function fetchAllBookings(
       _checkinRaw:   kb.firstCheckin,
       _checkoutRaw:  kb.lastCheckout,
       _isActiveRaw:  false,
+      _isResurrected: true,
       _stableKey:    stableKey,
     } as Booking);
   }
 
 /* ── 4. Végső védőháló: egy apartman ne szerepelhessen egyszerre ──
-   *    élő ÉS feltámasztott (szellem) állapotban.                    */
+   *    élő ÉS feltámasztott (szellem) állapotban. FONTOS: csak a
+   *    ténylegesen feltámasztott (_isResurrected) bejegyzéseket
+   *    szűrjük ki — a valódi, ma is a feedből érkező távozó
+   *    foglalásokat (pl. egy váltásnapon) sosem, még akkor sem,
+   *    ha ugyanahhoz az apartmanhoz van egy aktív érkező is. ── */
   const apartmentsWithLiveCoverage = new Set(
     bookings.filter((b) => b._isActiveRaw).map((b) => b.apartment)
   );
   bookings = bookings.filter(
-    (b) => b._isActiveRaw || !apartmentsWithLiveCoverage.has(b.apartment)
+    (b) => !(b as any)._isResurrected || b._isActiveRaw || !apartmentsWithLiveCoverage.has(b.apartment)
   );
 
   const ORDER: BookingStatus[] = ["arriving", "staying", "departing"];
