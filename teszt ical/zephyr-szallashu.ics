@@ -22,10 +22,10 @@ END:VEVENT
 
 BEGIN:VEVENT
 DTSTART;VALUE=DATE:20260706
-DTEND;VALUE=DATE:20260712
+DTEND;VALUE=DATE:20260715
 SUMMARY:Reserved
-UID:ical-Zephyr::20260712::szallas
-DESCRIPTION:Foglalás - Szallas.hu
+UID:ical-Zephyr::20260715::szallas
+DESCRIPTION:TESZT — 4. pont (több apartman egyszerre): KONFLIKTUS: Airbnb szerint 07.12, Szállás.hu szerint 07.15
 END:VEVENT
 
 BEGIN:VEVENT
