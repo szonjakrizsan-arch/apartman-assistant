@@ -109,9 +109,24 @@ export function useIcalBookings(
         }
       }
 
-      setBookings(b);
+/* Egyetlen-forrású apartmanok azonosítása — ezeknél a Szállás.hu
+         csonkolási hibája ellen nincs korrekciós lehetőség (nincs másik
+         platform, ami megerősítené a valós check-in dátumot). */
+      const sourcesByApartment = new Map<string, Set<string>>();
+      for (const fc of feedConfigs) {
+        if (!sourcesByApartment.has(fc.apartment)) sourcesByApartment.set(fc.apartment, new Set());
+        sourcesByApartment.get(fc.apartment)!.add(fc.source);
+      }
+      const bWithRisk = b.map((bk) => {
+        const sources = sourcesByApartment.get(bk.apartment);
+        const isSingleSzallasOnly = !!sources && sources.size === 1 && sources.has("szallas");
+        return isSingleSzallasOnly ? { ...bk, singleSourceRisk: true } : bk;
+      });
+
+      setBookings(bWithRisk);
       setFutureBookings(future);
       setErrors(e);
+      
       setStatus(e.length > 0 && b.length === 0 ? "error" : "success");
     } catch (err) {
       setErrors([String(err)]);
