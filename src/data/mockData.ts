@@ -37,6 +37,8 @@ export interface Booking {
   isTodayArrival?: boolean;
   isTodayDeparture?: boolean;
   hasSourceConflict?: boolean;
+  singleSourceRisk?: boolean;
+  
   /* diagnostic fields — raw iCal data */
   _uid?: string;
   _summary?: string;
