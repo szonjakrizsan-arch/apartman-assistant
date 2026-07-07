@@ -107,8 +107,21 @@ export function BookingCard({
   boxShadow: "0 0 0 1px rgb(217 171 78 / 0.55)",
 }}
   >
-    <AlertTriangle className="h-2.5 w-2.5" aria-hidden />
+ <AlertTriangle className="h-2.5 w-2.5" aria-hidden />
     Eltérő dátum — ellenőrizd
+  </span>
+)}
+          {booking.singleSourceRisk && (
+  <span
+    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+    style={{
+      background: "rgb(210 100 70 / 0.13)",
+      color: "#d26448",
+      boxShadow: "0 0 0 1px rgb(210 100 70 / 0.30)",
+    }}
+  >
+    <AlertTriangle className="h-2.5 w-2.5" aria-hidden />
+    Egyetlen forrás — dátum nem megerősíthető
   </span>
 )}
         </div>
