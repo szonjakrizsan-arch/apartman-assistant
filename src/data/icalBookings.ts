@@ -353,14 +353,21 @@ const filteredFuture = future.filter((f, idx) => {
     if (other === f) continue;
     const sameCheckin  = f._checkinRaw  === other._checkinRaw;
     const sameCheckout = f._checkoutRaw === other._checkoutRaw;
-    if (sameCheckin && sameCheckout) continue; // azonos foglalás két platformon, nem valódi ütközés
+    const myPrio = SOURCE_PRIORITY[f.source] ?? 99;
+    const otPrio = SOURCE_PRIORITY[other.source] ?? 99;
+
+    if (sameCheckin && sameCheckout) {
+      // Azonos foglalás két platformra szinkronizálva — csak a magasabb
+      // prioritású (pl. Airbnb) kártyát tartjuk meg, a duplikátumot nem.
+      if (myPrio > otPrio) return false;
+      continue;
+    }
+
     const aStart = parseIcalDate(f._checkinRaw!);
     const aEnd   = parseIcalDate(f._checkoutRaw!);
     const bStart = parseIcalDate(other._checkinRaw!);
     const bEnd   = parseIcalDate(other._checkoutRaw!);
     if (aStart < bEnd && bStart < aEnd) {
-      const myPrio = SOURCE_PRIORITY[f.source] ?? 99;
-      const otPrio = SOURCE_PRIORITY[other.source] ?? 99;
       if (myPrio > otPrio) return false;
     }
   }
