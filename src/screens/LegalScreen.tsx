@@ -75,7 +75,7 @@ hozzáférés-védelem). Az adatkezelő az alábbi adatfeldolgozókat
 veszi igénybe:
 
 - Supabase (adatbázis és hitelesítés) — adattárolás
-- Vercel (tárhelyszolgáltatás) — az alkalmazás futtatása
+- Cloudflare (tárhelyszolgáltatás) — az alkalmazás futtatása
 - Resend (email-küldés) — rendszerüzenetek kézbesítése
 
 Az adatfeldolgozók az Európai Unió, illetve azzal megfelelő
