@@ -77,6 +77,7 @@ veszi igénybe:
 - Supabase (adatbázis és hitelesítés) — adattárolás
 - Cloudflare (tárhelyszolgáltatás) — az alkalmazás futtatása
 - Resend (email-küldés) — rendszerüzenetek kézbesítése
+- Meta (Facebook) — a regisztráció sikeres lezárásának mérése hirdetési célból (Meta-képpont)
 
 Az adatfeldolgozók az Európai Unió, illetve azzal megfelelő
 adatvédelmi szintet biztosító országok szervereit használják.
