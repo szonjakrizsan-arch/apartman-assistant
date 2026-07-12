@@ -3,6 +3,7 @@ import { supabase } from "../supabaseClient";
 import { Home, Eye, EyeOff } from "lucide-react";
 import { LegalScreen } from "./LegalScreen";
 import type { LegalDoc } from "./LegalScreen";
+import { trackRegistrationComplete } from "../lib/metaPixel";
 
 type AuthMode = "login" | "register" | "forgot";
 
@@ -33,7 +34,10 @@ export function AuthScreen() {
         options: { data: { display_name: name } }
       });
       if (error) setError("Regisztráció sikertelen: " + error.message);
-      else setSuccess("Sikeres regisztráció! A fiókod jóváhagyásra vár — hamarosan értesítünk.");
+      else {
+        setSuccess("Sikeres regisztráció! A fiókod jóváhagyásra vár — hamarosan értesítünk.");
+        trackRegistrationComplete();
+      }
 
     } else if (mode === "forgot") {
       const { error } = await supabase.auth.resetPasswordForEmail(email);
