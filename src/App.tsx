@@ -17,7 +17,6 @@ import type { Booking }   from "./data/mockData";
 import { useApartments } from "./hooks/useApartments";
 import { ApartmentsScreen } from "./screens/ApartmentsScreen";
 import { supabase } from "./supabaseClient";
-import { trackRegistrationComplete } from "./lib/metaPixel";
 
 export default function App() {
   const [tab, setTab] = useState<TabId>("home");
@@ -87,13 +86,6 @@ export default function App() {
       <SideNav active={tab} onChange={setTab} />
       <div className="flex flex-col flex-1 min-w-0">
         <AppHeader tab={tab} />
-        {/* TEMP DEBUG — remove after Meta Pixel testing is confirmed working */}
-        <button type="button"
-          onClick={() => { trackRegistrationComplete(); alert("CompleteRegistration esemény elküldve."); }}
-          style={{ position: "fixed", bottom: 12, right: 12, zIndex: 9999, background: "#e07a5f", color: "#fff", padding: "8px 12px", borderRadius: 8, fontSize: 12 }}>
-          TEST: fire CompleteRegistration
-        </button>
-        {/* END TEMP DEBUG */}
         <main className="mx-auto w-full max-w-2xl px-4 pt-5 pb-24 md:pb-8 md:px-8">
           {tab === "home" && (
             <HomeScreen onNavigate={setTab} appState={appState} ical={ical} hasApartments={apartments.length > 0} />
