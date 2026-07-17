@@ -33,6 +33,15 @@ export function HomeScreen({ onNavigate, appState, ical, hasApartments }: HomeSc
     occupied: 0,
   }));
 
+  // Naponta EGYEDI apartman-neveket gyűjtünk (Set), nem foglalásokat
+  // számolunk. Így ha egy apartmannak két forrásból (pl. Airbnb és
+  // Szállás.hu) is van egymást átfedő bejegyzése ugyanarra az időszakra,
+  // az az egy apartman csak egyszer számít bele az adott nap
+  // érkezés/foglaltság/távozás értékébe — nem kétszer.
+  const arrivalApartmentsByDay: Set<string>[] = weekDays.map(() => new Set());
+  const occupiedApartmentsByDay: Set<string>[] = weekDays.map(() => new Set());
+  const departureApartmentsByDay: Set<string>[] = weekDays.map(() => new Set());
+
   [...ical.bookings, ...ical.futureBookings].forEach((booking) => {
     if (!booking._checkinRaw || !booking._checkoutRaw) return;
 
@@ -56,11 +65,11 @@ export function HomeScreen({ onNavigate, appState, ical, hasApartments }: HomeSc
         arrivalDate.getMonth() === dayStart.getMonth() &&
         arrivalDate.getDate() === dayStart.getDate()
       ) {
-        weekOverview[index].arrivals++;
+        arrivalApartmentsByDay[index].add(booking.apartment);
       }
 
       if (dayStart >= arrivalDate && dayStart < departureDate) {
-        weekOverview[index].occupied++;
+        occupiedApartmentsByDay[index].add(booking.apartment);
       }
 
       if (
@@ -68,9 +77,15 @@ export function HomeScreen({ onNavigate, appState, ical, hasApartments }: HomeSc
         departureDate.getMonth() === dayStart.getMonth() &&
         departureDate.getDate() === dayStart.getDate()
       ) {
-        weekOverview[index].departures++;
+        departureApartmentsByDay[index].add(booking.apartment);
       }
     });
+  });
+
+  weekOverview.forEach((day, index) => {
+    day.arrivals = arrivalApartmentsByDay[index].size;
+    day.occupied = occupiedApartmentsByDay[index].size;
+    day.departures = departureApartmentsByDay[index].size;
   });
 
   const stats = [
@@ -150,3 +165,4 @@ export function HomeScreen({ onNavigate, appState, ical, hasApartments }: HomeSc
     </div>
   );
 }
+
