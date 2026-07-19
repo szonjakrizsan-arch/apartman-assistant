@@ -55,6 +55,11 @@ function normalizeEvent(
   if (feed.source === "szallas" && !isKnownBooking && !isArrivingToday) return null;
   if (feed.source === "szallas" && !isKnownBooking && !isArrivingToday) return null;
 
+  // ÚJ: Airbnb "(Not available)" blokkok kiszűrése — ezek letiltott/
+  // szinkronizált naptár-blokkok, NEM valódi vendégfoglalások.
+  if (feed.source === "airbnb" && summary.toLowerCase().includes("not available")) {
+    return null;
+  }
   if (nights <= 0) return null;
   const isActive        = checkin <= today && today < checkout;
   const isCheckoutToday = today.getTime() === checkout.getTime();
