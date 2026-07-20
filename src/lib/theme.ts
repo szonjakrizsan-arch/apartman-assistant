@@ -47,6 +47,22 @@ export const sourceStyles: Record<
     badge: "bg-navy-soft text-navy/90 ring-1 ring-navy/20",
     label: "Szallas.hu",
   },
+  Google: {
+    badge: "bg-[#4285f41a] text-[#8ab4f8] ring-1 ring-[#4285f430]",
+    label: "Google",
+  },
+  VRBO: {
+    badge: "bg-[#3b5ca01a] text-[#8fa8d8] ring-1 ring-[#3b5ca030]",
+    label: "VRBO",
+  },
+  TripAdvisor: {
+    badge: "bg-[#34e0a11a] text-[#7fe0bc] ring-1 ring-[#34e0a130]",
+    label: "TripAdvisor",
+  },
+  Expedia: {
+    badge: "bg-[#f9c0001a] text-[#e0c060] ring-1 ring-[#f9c00030]",
+    label: "Expedia",
+  },
 };
 
 export const paymentLabels: Record<PaymentStatus, string> = {
