@@ -132,7 +132,7 @@ export function HomeScreen({ onNavigate, appState, ical, hasApartments, onAddDem
             Első apartman hozzáadása →
           </button>
           <button type="button" onClick={onAddDemo}
-            className="pressable text-[12px] font-semibold text-text-muted underline underline-offset-2">
+            className="pressable text-[13px] font-bold text-white underline underline-offset-2">
             Inkább kipróbálom demo adatokkal
           </button>
           <p className="text-[11px] text-text-muted max-w-xs mt-1">
