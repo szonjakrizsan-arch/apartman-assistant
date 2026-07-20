@@ -23,7 +23,8 @@ export default function App() {
   const [openBooking, setOpenBooking] = useState<Booking | null>(null);
   const { user, loading, passwordRecovery, clearRecovery } = useAuth();
   const appState = useAppState(user?.id);
-  const { apartments, feeds, addApartment, deleteApartment, addFeed, deleteFeed } = useApartments(user?.id);
+  const { apartments, feeds, addApartment, deleteApartment, addFeed, deleteFeed, addDemoApartment, deleteDemoApartments } = useApartments(user?.id);
+  const hasDemoApartments = apartments.some((a) => a.is_demo);
   const ical = useIcalBookings(apartments, feeds, user?.id);
 
   const [approved, setApproved] = useState<boolean | null>(null);
@@ -86,9 +87,21 @@ export default function App() {
       <SideNav active={tab} onChange={setTab} />
       <div className="flex flex-col flex-1 min-w-0">
         <AppHeader tab={tab} />
+        {hasDemoApartments && (
+          <div className="mx-auto w-full max-w-2xl px-4 md:px-8">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl px-4 py-2.5 text-[12px]"
+              style={{ background: "rgb(216 185 104 / 0.12)", color: "#b3922f", outline: "1px solid rgb(216 185 104 / 0.25)" }}>
+              <span className="font-semibold">Jelenleg demo módban vagy — ezek fiktív adatok.</span>
+              <button type="button" onClick={deleteDemoApartments}
+                className="pressable font-semibold underline underline-offset-2">
+                Demo adatok törlése és saját szálláshely hozzáadása
+              </button>
+            </div>
+          </div>
+        )}
         <main className="mx-auto w-full max-w-2xl px-4 pt-5 pb-24 md:pb-8 md:px-8">
           {tab === "home" && (
-            <HomeScreen onNavigate={setTab} appState={appState} ical={ical} hasApartments={apartments.length > 0} />
+            <HomeScreen onNavigate={setTab} appState={appState} ical={ical} hasApartments={apartments.length > 0} onAddDemo={addDemoApartment} />
           )}
           <div className={tab === "bookings" ? undefined : "hidden"}>
             <BookingsScreen appState={appState} ical={ical} openBooking={openBooking} setOpenBooking={setOpenBooking} />
