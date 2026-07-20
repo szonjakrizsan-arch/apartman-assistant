@@ -25,7 +25,7 @@ export const onRequestGet: PagesFunction = async () => {
   );
 
   const bookings = [
-    { uid: "demo-1", startOffset: -1, endOffset: 2, summary: "Foglalva - Teszt Elek" },
+    { uid: "demo-1", startOffset: 0, endOffset: 3, summary: "Foglalva - Teszt Elek" },
     { uid: "demo-2", startOffset: 4,  endOffset: 7, summary: "Foglalva - Kovács Anna" },
     { uid: "demo-3", startOffset: 9,  endOffset: 12, summary: "Foglalva - Nagy Béla" },
   ];
