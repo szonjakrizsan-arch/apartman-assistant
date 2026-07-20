@@ -11,8 +11,9 @@ interface HomeScreenProps {
   appState: AppState & AppStateActions;
   ical: IcalState;
   hasApartments: boolean;
+  onAddDemo: () => void;
 }
-export function HomeScreen({ onNavigate, appState, ical, hasApartments }: HomeScreenProps) {
+export function HomeScreen({ onNavigate, appState, ical, hasApartments, onAddDemo }: HomeScreenProps) {
   const { isPaymentPaid, togglePaymentStatus, userName } = appState;
 
   const taskCount = ical.bookings.filter((b) => b.status === "departing").length;
@@ -129,6 +130,10 @@ export function HomeScreen({ onNavigate, appState, ical, hasApartments }: HomeSc
             className="pressable mt-2 rounded-xl px-6 py-3 text-[13px] font-semibold"
             style={{ background: "rgb(86 176 187 / 0.20)", color: "#56b0bb", outline: "1px solid rgb(86 176 187 / 0.30)" }}>
             Első apartman hozzáadása →
+          </button>
+          <button type="button" onClick={onAddDemo}
+            className="pressable text-[12px] font-semibold text-text-muted underline underline-offset-2">
+            Inkább kipróbálom demo adatokkal
           </button>
           <p className="text-[11px] text-text-muted max-w-xs mt-1">
             Az iCal naptárlinket a foglalási oldal beállításaiban találod
