@@ -6,7 +6,10 @@ export interface ApartmentRow {
   id: string;
   name: string;
   accent: ApartmentAccent;
+  is_demo?: boolean;
 }
+
+const DEMO_FEED_URL = "https://app.apartmanassistant.hu/api/demo-ical";
 
 export interface FeedRow {
   id: string;
@@ -28,7 +31,7 @@ async function load() {
  
     const { data: apts } = await supabase
       .from("apartments")
-      .select("id, name, accent")
+      .select("id, name, accent, is_demo")
       .eq("user_id", userId)
       .order("created_at");
 
@@ -66,5 +69,41 @@ async function load() {
     await load();
   }
 
-  return { apartments, feeds, loading, addApartment, deleteApartment, addFeed, deleteFeed };
+  /** Demo apartman + hozzá tartozó demo iCal feed felvétele, hogy a felhasználó
+   *  kockázat nélkül ki tudja próbálni az appot, mielőtt a saját adatait bevinné. */
+  async function addDemoApartment() {
+    if (!userId) return;
+    const { data: apt } = await supabase
+      .from("apartments")
+      .insert({ user_id: userId, name: "Minta Apartman – Teszt Elek", accent: "amber", is_demo: true })
+      .select("id")
+      .single();
+    if (apt) {
+      await supabase.from("ical_feeds").insert({
+        user_id: userId,
+        apartment_id: apt.id,
+        source: "google",
+        url: DEMO_FEED_URL,
+      });
+    }
+    await load();
+  }
+
+  /** Az összes demo apartman és a hozzájuk tartozó feedek törlése,
+   *  hogy a felhasználó tiszta lappal kezdhesse a saját adataival. */
+  async function deleteDemoApartments() {
+    if (!userId) return;
+    const demoIds = apartments.filter((a) => a.is_demo).map((a) => a.id);
+    if (demoIds.length) {
+      await supabase.from("ical_feeds").delete().in("apartment_id", demoIds);
+      await supabase.from("apartments").delete().in("id", demoIds);
+    }
+    await load();
+  }
+
+  return {
+    apartments, feeds, loading,
+    addApartment, deleteApartment, addFeed, deleteFeed,
+    addDemoApartment, deleteDemoApartments,
+  };
 }
