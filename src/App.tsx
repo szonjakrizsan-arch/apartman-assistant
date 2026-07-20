@@ -89,9 +89,9 @@ export default function App() {
         <AppHeader tab={tab} />
         {hasDemoApartments && (
           <div className="mx-auto w-full max-w-2xl px-4 md:px-8">
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl px-4 py-2.5 text-[12px]"
-              style={{ background: "rgb(216 185 104 / 0.12)", color: "#b3922f", outline: "1px solid rgb(216 185 104 / 0.25)" }}>
-              <span className="font-semibold">Jelenleg demo módban vagy — ezek fiktív adatok.</span>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl px-4 py-2.5 text-[13px]"
+              style={{ background: "rgb(216 185 104 / 0.22)", color: "#f0cb5e", outline: "1px solid rgb(216 185 104 / 0.45)" }}>
+              <span className="font-bold">Jelenleg demo módban vagy — ezek fiktív adatok.</span>
               <button type="button" onClick={deleteDemoApartments}
                 className="pressable font-semibold underline underline-offset-2">
                 Demo adatok törlése és saját szálláshely hozzáadása
