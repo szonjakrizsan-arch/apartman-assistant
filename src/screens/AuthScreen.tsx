@@ -29,12 +29,14 @@ export function AuthScreen() {
     } else if (mode === "register") {
       if (!name.trim()) { setError("Kérjük adja meg a nevét."); setLoading(false); return; }
       if (!accepted) { setError("A regisztrációhoz el kell fogadnod a feltételeket."); setLoading(false); return; }
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email, password,
         options: { data: { display_name: name } }
       });
       if (error) setError("Regisztráció sikertelen: " + error.message);
-      else {
+      else if (data.user && data.user.identities && data.user.identities.length === 0) {
+        setError("Ez az email cím már regisztrálva van. Jelentkezz be, vagy állítsd vissza a jelszavad.");
+      } else {
         setSuccess("Sikeres regisztráció! A fiókod jóváhagyásra vár — hamarosan értesítünk.");
         trackRegistrationComplete();
       }
