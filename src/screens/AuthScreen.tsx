@@ -4,6 +4,7 @@ import { Home, Eye, EyeOff } from "lucide-react";
 import { LegalScreen } from "./LegalScreen";
 import type { LegalDoc } from "./LegalScreen";
 import { trackRegistrationComplete } from "../lib/metaPixel";
+import { trackRegistrationConversion } from "../lib/googleAds";
 
 type AuthMode = "login" | "register" | "forgot";
 
@@ -39,6 +40,7 @@ export function AuthScreen() {
       } else {
         setSuccess("Sikeres regisztráció! A fiókod jóváhagyásra vár — hamarosan értesítünk.");
         trackRegistrationComplete();
+        trackRegistrationConversion();
       }
 
     } else if (mode === "forgot") {
