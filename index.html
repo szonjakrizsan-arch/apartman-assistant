@@ -28,6 +28,16 @@
     'https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', '982039981469218');
     </script>
+    <!-- Google Ads tag: base loader only. The registration conversion
+         event itself is fired explicitly from code (see googleAds.ts),
+         at the moment a signup succeeds. -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18334546190"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'AW-18334546190');
+    </script>
   </head>
   <body>
     <div id="root"></div>
