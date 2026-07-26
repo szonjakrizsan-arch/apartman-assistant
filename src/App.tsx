@@ -18,6 +18,11 @@ import { useApartments } from "./hooks/useApartments";
 import { ApartmentsScreen } from "./screens/ApartmentsScreen";
 import { supabase } from "./supabaseClient";
 
+// Ha true: regisztráció után a user csak akkor léphet be, ha te jóváhagyod
+// a profiles.approved mezőt Supabase-ben. Ha false: mindenki azonnal bejut.
+// Kapcsold vissza true-ra, ha megint szükség lesz rá (pl. sok spam regisztráció).
+const REQUIRE_APPROVAL = false;
+
 export default function App() {
   const [tab, setTab] = useState<TabId>("home");
   const [openBooking, setOpenBooking] = useState<Booking | null>(null);
@@ -61,7 +66,7 @@ export default function App() {
     return <AuthScreen />;
   }
 
-  if (approved === false) {
+  if (REQUIRE_APPROVAL && approved === false) {
     return (
       <div className="min-h-dvh bg-surface flex items-center justify-center px-4">
         <div className="w-full max-w-sm text-center flex flex-col items-center gap-4">
