@@ -21,6 +21,7 @@ import { supabase } from "./supabaseClient";
 export default function App() {
   const [tab, setTab] = useState<TabId>("home");
   const [openBooking, setOpenBooking] = useState<Booking | null>(null);
+  const [justRemovedDemo, setJustRemovedDemo] = useState(false);
   const { user, loading, passwordRecovery, clearRecovery } = useAuth();
   const appState = useAppState(user?.id);
   const { apartments, feeds, addApartment, deleteApartment, addFeed, deleteFeed, addDemoApartment, deleteDemoApartments } = useApartments(user?.id);
@@ -92,7 +93,11 @@ export default function App() {
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl px-4 py-2.5 text-[13px]"
               style={{ background: "rgb(216 185 104 / 0.22)", color: "#f0cb5e", outline: "1px solid rgb(216 185 104 / 0.45)" }}>
               <span className="font-bold">Jelenleg demo módban vagy — ezek fiktív adatok.</span>
-              <button type="button" onClick={deleteDemoApartments}
+              <button type="button" onClick={async () => {
+                await deleteDemoApartments();
+                setTab("apartments");
+                setJustRemovedDemo(true);
+              }}
                 className="pressable font-semibold underline underline-offset-2">
                 Demo adatok törlése és saját szálláshely hozzáadása
               </button>
@@ -111,7 +116,14 @@ export default function App() {
           )}
           {tab === "invoices" && <InvoicesScreen appState={appState} ical={ical} />}
           {tab === "contacts" && <ContactsScreen appState={appState} ical={ical} userId={user.id} />}
-          {tab === "apartments" && <ApartmentsScreen userId={user.id} shared={{ apartments, feeds, addApartment, deleteApartment, addFeed, deleteFeed }} />}
+          {tab === "apartments" && (
+            <ApartmentsScreen
+              userId={user.id}
+              shared={{ apartments, feeds, addApartment, deleteApartment, addFeed, deleteFeed }}
+              autoOpenAdd={justRemovedDemo}
+              onAutoOpenHandled={() => setJustRemovedDemo(false)}
+            />
+          )}
         </main>
       </div>
       <BottomNav active={tab} onChange={setTab} />
