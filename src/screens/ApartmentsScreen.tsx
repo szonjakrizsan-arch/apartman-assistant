@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IcalHelpModal } from "../components/IcalHelpModal";
 import { Plus, Trash2, Link, ChevronDown, ChevronUp } from "lucide-react";
 import { SectionHeader } from "../components/SectionHeader";
@@ -37,14 +37,24 @@ interface ApartmentsScreenProps {
     addFeed: (apartmentId: string, source: string, url: string) => Promise<void>;
     deleteFeed: (id: string) => Promise<void>;
   };
+  autoOpenAdd?: boolean;
+  onAutoOpenHandled?: () => void;
 }
-export function ApartmentsScreen({ userId, shared }: ApartmentsScreenProps) {
+export function ApartmentsScreen({ userId, shared, autoOpenAdd, onAutoOpenHandled }: ApartmentsScreenProps) {
   const { apartments, feeds, addApartment, deleteApartment, addFeed, deleteFeed } = shared;
   const loading = false;
 
   const [newName, setNewName]     = useState("");
   const [newAccent, setNewAccent] = useState<ApartmentAccent>("coral");
   const [showAddApt, setShowAddApt] = useState(false);
+
+  useEffect(() => {
+    if (autoOpenAdd) {
+      setShowAddApt(true);
+      onAutoOpenHandled?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpenAdd]);
 
   const [expandedApt, setExpandedApt] = useState<string | null>(null);
   const [newSource, setNewSource] = useState("airbnb");
