@@ -1,47 +1,31 @@
 BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Airbnb Inc//Hosting Calendar 0.8.1.5//EN
-X-WR-CALNAME:Balázs - Airbnb
+X-WR-CALNAME:Balázs - Airbnb Teszt Augusztus
 X-WR-CALDESC:Airbnb reservation calendar
 
 BEGIN:VEVENT
-DTSTART;VALUE=DATE:20260801
-DTEND;VALUE=DATE:20260803
+DTSTART;VALUE=DATE:20260803
+DTEND;VALUE=DATE:20260805
 SUMMARY:Reserved
-UID:airbnb-balazs-001@airbnb.com
-DESCRIPTION:Reservation - Airbnb (Távozás: 08.03)
-END:VEVENT
-
-BEGIN:VEVENT
-DTSTART;VALUE=DATE:20260802
-DTEND;VALUE=DATE:20260804
-SUMMARY:Reserved
-UID:airbnb-balazs-002@airbnb.com
-DESCRIPTION:Reservation - Airbnb (Távozás: 08.04)
+UID:airbnb-test-aug-001@airbnb.com
+DESCRIPTION:Reservation - Mai érkezés (08.03), távozás: 08.05
 END:VEVENT
 
 BEGIN:VEVENT
 DTSTART;VALUE=DATE:20260805
-DTEND;VALUE=DATE:20260807
+DTEND;VALUE=DATE:20260808
 SUMMARY:Reserved
-UID:airbnb-balazs-003@airbnb.com
-DESCRIPTION:Reservation - Airbnb (2 éjszaka)
+UID:airbnb-test-aug-002@airbnb.com
+DESCRIPTION:Reservation - Érkezés: 08.05, távozás: 08.08
 END:VEVENT
 
 BEGIN:VEVENT
 DTSTART;VALUE=DATE:20260808
-DTEND;VALUE=DATE:20260810
+DTEND;VALUE=DATE:20260811
 SUMMARY:Reserved
-UID:airbnb-balazs-004@airbnb.com
-DESCRIPTION:Reservation - Airbnb (2 éjszaka)
-END:VEVENT
-
-BEGIN:VEVENT
-DTSTART;VALUE=DATE:20260811
-DTEND;VALUE=DATE:20260814
-SUMMARY:Reserved
-UID:airbnb-balazs-005@airbnb.com
-DESCRIPTION:Reservation - Airbnb (3 éjszaka)
+UID:airbnb-test-aug-003@airbnb.com
+DESCRIPTION:Reservation - Érkezés: 08.08, távozás: 08.11
 END:VEVENT
 
 END:VCALENDAR
