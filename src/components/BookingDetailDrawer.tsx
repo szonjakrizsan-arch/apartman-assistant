@@ -551,7 +551,13 @@ useEffect(() => {
                   <ArrivalCheckRow
                     done={paymentPaid}
                     label="Fizetés ellenőrizve"
-                    sublabel={paymentPaid ? "Fizetés megerősítve" : "Fizetési blokk — Függőben"}
+                    sublabel={
+                      paymentPaid
+                        ? "Fizetés megerősítve"
+                        : parseAmount(payment.deposit) > 0 && parseAmount(payment.amount) > 0
+                          ? `Fizetési blokk — Részben fizetve, hátralék: ${formatFt(remainingAmount(payment))}`
+                          : "Fizetési blokk — Függőben"
+                    }
                     readOnly
                   />
 
