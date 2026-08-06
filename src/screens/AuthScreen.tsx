@@ -32,7 +32,7 @@ export function AuthScreen() {
       if (!accepted) { setError("A regisztrációhoz el kell fogadnod a feltételeket."); setLoading(false); return; }
       const { data, error } = await supabase.auth.signUp({
         email, password,
-        options: { data: { display_name: name } }
+        options: { data: { display_name: name, market: "hu" } }
       });
       if (error) setError("Regisztráció sikertelen: " + error.message);
       else if (data.user && data.user.identities && data.user.identities.length === 0) {
