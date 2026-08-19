@@ -352,12 +352,20 @@ export async function fetchFutureBookings(feeds: FeedConfig[]): Promise<import("
     if (r.status !== "fulfilled") continue;
 
     for (const e of r.value) {
+      const feed = feeds[i];
+
+      // Airbnb "(Not available)" blokkok kiszűrése — ezek letiltott/
+      // szinkronizált naptár-blokkok, NEM valódi vendégfoglalások.
+      // (Ugyanaz a szűrés, mint a normalizeEvent()-ben a mai foglalásoknál.)
+      if (feed.source === "airbnb" && (e.summary ?? "").toLowerCase().includes("not available")) {
+        continue;
+      }
+
       const checkin  = parseIcalDate(e.dtstart);
       const checkout = parseIcalDate(e.dtend);
       if (checkin <= today || checkin > cutoff) continue;
       const nights = daysBetween(checkin, checkout);
       if (nights <= 0) continue;
-      const feed = feeds[i];
       const key  = `${feed.apartment}::${e.dtstart}::${feed.source}`;
 if (seen.has(key)) continue;
 seen.add(key);
