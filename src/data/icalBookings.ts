@@ -259,10 +259,13 @@ export async function fetchAllBookings(
       if (s.apartment !== b.apartment) continue;
       const overlaps = bCheckin < s.checkout && s.checkin < bCheckout;
       if (!overlaps) continue;
-      const sameRange =
-        bCheckin.getTime() === s.checkin.getTime() &&
-        bCheckout.getTime() === s.checkout.getTime();
-      if (!sameRange) {
+      // Legfeljebb 1 napos eltérést megengedünk (pl. takarítási/átfordulási
+      // nap az Airbnb blokkjában) — csak az ennél nagyobb eltérést jelezzük.
+      const DAY_MS = 86_400_000;
+      const checkinDiffDays  = Math.abs(bCheckin.getTime()  - s.checkin.getTime())  / DAY_MS;
+      const checkoutDiffDays = Math.abs(bCheckout.getTime() - s.checkout.getTime()) / DAY_MS;
+      const withinTolerance = checkinDiffDays <= 1 && checkoutDiffDays <= 1;
+      if (!withinTolerance) {
         b.hasSourceConflict = true;
         break;
       }
