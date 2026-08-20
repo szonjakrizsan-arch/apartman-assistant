@@ -149,7 +149,10 @@ async function getPendingCleanings(env: Env, apartmentId: string, apartmentName:
     }
 
     for (const ev of parseIcal(text)) {
-      if (/not available/i.test(ev.summary ?? "")) continue; // blokkoló bejegyzés (Airbnb, Szállás.hu stb.)
+      // Csak Airbnb-nél biztos, hogy a "(Not available)" nem valódi
+      // foglalás — Szállás.hu-nál ez a szöveg valódi, normál hosszúságú
+      // foglalásoknál is előfordulhat, ott nem szabad kiszűrni.
+      if (feed.source === "airbnb" && /not available/i.test(ev.summary ?? "")) continue;
       const checkout = parseIcalDate(ev.dtend);
       if (checkout > today || checkout < windowStart) continue;
 
