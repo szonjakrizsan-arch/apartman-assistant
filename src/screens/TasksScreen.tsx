@@ -1,13 +1,15 @@
-import { Sparkles, Check, AlertCircle, Banknote, Key, Send, ClipboardCheck, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles, Check, AlertCircle, Banknote, Key, Send, ClipboardCheck, Plus, Trash2, ChevronDown, ChevronUp, Copy, Link2 } from "lucide-react";
 import { useState } from "react";
 import type { AppState, AppStateActions, DerivedTask, CustomTask } from "../data/appState";
 import { deriveTasks, RECURRENCE_LABELS, isCustomTaskActiveToday } from "../data/appState";
 import type { CustomTaskRecurrence } from "../data/appState";
 import type { IcalState } from "../data/useIcalBookings";
+import type { ApartmentRow } from "../hooks/useApartments";
 
 interface TasksScreenProps {
   appState: AppState & AppStateActions;
   ical: IcalState;
+  apartments: ApartmentRow[];
 }
 
 const TASK_CONFIG = {
@@ -285,7 +287,7 @@ function groupByApartment(tasks: DerivedTask[]): { apartment: string; tasks: Der
 }
 
 /* ── Main screen ─────────────────────────────────────────────────── */
-export function TasksScreen({ appState, ical }: TasksScreenProps) {
+export function TasksScreen({ appState, ical, apartments }: TasksScreenProps) {
   const { detailStates, paymentData, customTasks, getDetail, setDetail, getPayment, setPayment, addCustomTask, toggleCustomTask, deleteCustomTask } = appState;
   const tasks = deriveTasks(ical.bookings, detailStates, paymentData);
 
@@ -305,6 +307,20 @@ export function TasksScreen({ appState, ical }: TasksScreenProps) {
   const [payCollapsed,     setPayCollapsed]      = useState(false);
   const [cleanCollapsed,   setCleanCollapsed]    = useState(false);
   const [customCollapsed,  setCustomCollapsed]   = useState(false);
+  const [linksCollapsed,   setLinksCollapsed]    = useState(true);
+  const [copiedApt,        setCopiedApt]         = useState<string | null>(null);
+
+  async function handleCopyCleaningLink(apt: ApartmentRow) {
+    if (!apt.cleaning_token) return;
+    const url = `https://app.apartmanassistant.hu/api/cleaning/${apt.cleaning_token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedApt(apt.id);
+      setTimeout(() => setCopiedApt(null), 2000);
+    } catch {
+      // A vágólap esetleg nem elérhető (pl. hiányzó jogosultság) — ilyenkor csendben figyelmen kívül hagyjuk.
+    }
+  }
 
   function toggleTask(task: DerivedTask) {
     if (task.type === "cleaning") {
@@ -353,6 +369,40 @@ export function TasksScreen({ appState, ical }: TasksScreenProps) {
           </div>
         )}
       </div>
+
+      {/* Takarítói linkek — mindig látható, a mai feladatoktól függetlenül */}
+      {apartments.length > 0 && (
+        <div className="rounded-2xl border px-4 py-3" style={{ borderColor: "rgb(220 132 96 / 0.25)", background: "rgb(220 132 96 / 0.05)" }}>
+          <button type="button" onClick={() => setLinksCollapsed((v) => !v)}
+            className="pressable flex w-full items-center justify-between text-left">
+            <span className="flex items-center gap-2">
+              <Link2 className="h-4 w-4" style={{ color: "#dc8460" }} />
+              <span className="text-[13px] font-semibold" style={{ color: "#dc8460" }}>Takarítói linkek</span>
+            </span>
+            {linksCollapsed ? <ChevronDown className="h-4 w-4 text-text-muted" /> : <ChevronUp className="h-4 w-4 text-text-muted" />}
+          </button>
+          {!linksCollapsed && (
+            <div className="mt-3 flex flex-col gap-2">
+              <p className="text-[11px] text-text-muted mb-1">
+                Egy saját, titkos link apartmanonként — küldd el a takarítódnak (pl. WhatsAppon). Bejelentkezés nem szükséges.
+              </p>
+              {apartments.map((apt) => (
+                <button key={apt.id} type="button" onClick={() => handleCopyCleaningLink(apt)}
+                  className="pressable flex items-center gap-2 rounded-xl border px-3 py-2 text-left"
+                  style={{ borderColor: "rgb(220 132 96 / 0.25)", background: "rgb(220 132 96 / 0.06)", color: "#dc8460" }}>
+                  {copiedApt === apt.id
+                    ? <Check className="h-3.5 w-3.5 shrink-0" />
+                    : <Copy className="h-3.5 w-3.5 shrink-0 opacity-70" />}
+                  <span className="text-[12px] font-medium flex-1 truncate">{apt.name}</span>
+                  <span className="text-[11px] opacity-80 shrink-0">
+                    {copiedApt === apt.id ? "Másolva!" : "Link másolása"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {totalCount === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed px-4 py-10 text-center"
