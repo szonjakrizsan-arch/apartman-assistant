@@ -117,7 +117,7 @@ export default function App() {
             <BookingsScreen appState={appState} ical={ical} openBooking={openBooking} setOpenBooking={setOpenBooking} />
           </div>
           {tab === "tasks" && (
-            <TasksScreen appState={appState} ical={ical} />
+            <TasksScreen appState={appState} ical={ical} apartments={apartments} />
           )}
           {tab === "invoices" && <InvoicesScreen appState={appState} ical={ical} />}
           {tab === "contacts" && <ContactsScreen appState={appState} ical={ical} userId={user.id} />}
