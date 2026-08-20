@@ -26,33 +26,6 @@ const SOURCE_PRIORITY: Record<BookingSource, number> = {
   "Szallas.hu": 6,
 };
 
-/**
- * A Szállás.hu automatikusan generált "nem elérhető" (turnover/sync) blokkjait
- * ismeri fel — ezek NEM valódi vendégfoglalások, hanem a rendszer által minden
- * nap újragenerált, csúszó dátumú placeholder-események.
- *
- * FONTOS: ezt NEM a SUMMARY szövege ("Not available") alapján döntjük el,
- * mert azt valódi, egyedi foglalási azonosítóval rendelkező vendégfoglalások
- * is használhatják (lásd normalizeEvent lenti megjegyzését). Ehelyett az UID
- * SZERKEZETÉT vizsgáljuk: a Szállás.hu ezeknél a szintetikus blokkoknál magát
- * a dátumtartományt (DTSTART+DTEND) írja bele az UID-ba, valódi, egyedi
- * foglalási referenciaszám nélkül — pl. "4970365-2026082020260823@szallas.hu"
- * egy 2026-08-20 → 2026-08-23 blokknál. Egy valódi foglalás UID-ja ettől
- * eltérő, saját foglalási azonosítót tartalmaz.
- *
- * Ez a védelem azért kritikus, mert az ilyen blokkok DTSTART-ja a Szállás.hu
- * csonkítása miatt naponta előre csúszik — ha ezt "első látott check-in"-ként
- * mentenénk a booking_starts táblába, a rendszer örökre egy egyre régebbi,
- * hamis kezdődátumot "ragasztana" a mindig ugyanazzal a DTEND-del visszatérő
- * blokkra, ami hetekkel korábbra nyúló, hamis foglalást és hamis
- * forrás-ütközést eredményezne a valódi foglalásokkal szemben.
- */
-function isSzallasAutoBlock(uid: string, dtstart: string, dtend: string): boolean {
-  const m = uid.match(/^\d+-(\d{8})(\d{8})@szallas\.hu$/i);
-  if (!m) return false;
-  return m[1] === dtstart && m[2] === dtend;
-}
-
 function deriveStatus(checkin: Date, checkout: Date, today: Date): BookingStatus {
   if (today.getTime() === checkin.getTime()) return "arriving";
   if (today.getTime() === checkout.getTime()) return "departing";
@@ -80,14 +53,7 @@ function normalizeEvent(
   const isArrivingToday = checkin.getTime() === today.getTime();
 
   if (feed.source === "szallas" && !isKnownBooking && !isArrivingToday) return null;
-
-  // Szállás.hu automatikusan generált "nem elérhető" blokkok kiszűrése —
-  // lásd isSzallasAutoBlock() fenti megjegyzését. Ez UID-szerkezet alapján
-  // dolgozik, nem a SUMMARY szövege alapján, hogy valódi foglalásokat
-  // véletlenül se szűrjön ki.
-  if (feed.source === "szallas" && isSzallasAutoBlock(uid, dtstart, dtend)) {
-    return null;
-  }
+  if (feed.source === "szallas" && !isKnownBooking && !isArrivingToday) return null;
 
   // Airbnb "(Not available)" blokkok kiszűrése — ezek letiltott/
   // szinkronizált naptár-blokkok, NEM valódi vendégfoglalások.
@@ -358,12 +324,6 @@ export async function fetchFutureBookings(feeds: FeedConfig[]): Promise<import("
         continue;
       }
 
-      // Szállás.hu automatikusan generált "nem elérhető" blokkok kiszűrése
-      // a jövőbeli foglalások listájából is — lásd isSzallasAutoBlock().
-      if (feed.source === "szallas" && isSzallasAutoBlock(e.uid, e.dtstart, e.dtend)) {
-        continue;
-      }
-
       const checkin  = parseIcalDate(e.dtstart);
       const checkout = parseIcalDate(e.dtend);
       if (checkin <= today || checkin > cutoff) continue;
@@ -452,4 +412,3 @@ async function fetchFeedRaw(feed: FeedConfig) {
     return [];
   }
 }
-
