@@ -90,26 +90,6 @@ function normalizeEvent(
   } as Booking;
 }
 
-// Csak konfliktus-jelzésre használt Airbnb "(Not available)" intervallum.
-// SOHA nem válik önálló, megjelenő foglalássá és a prioritás-logikában
-// sem vesz részt — kizárólag arra szolgál, hogy jelezzük, ha egy másik
-// forrás (pl. Szállás.hu) eltérő dátumokat mutat ugyanarra az időszakra.
-type SyncBlock = { apartment: string; checkin: Date; checkout: Date };
-
-function extractAirbnbSyncBlock(
-  feed: FeedConfig,
-  dtstart: string,
-  dtend: string,
-  summary: string,
-): SyncBlock | null {
-  if (feed.source !== "airbnb") return null;
-  if (!summary.toLowerCase().includes("not available")) return null;
-  const checkin  = parseIcalDate(dtstart);
-  const checkout = parseIcalDate(dtend);
-  if (daysBetween(checkin, checkout) <= 0) return null;
-  return { apartment: feed.apartment, checkin, checkout };
-}
-
 function rangesOverlap(a: Booking, b: Booking): boolean {
   const aStart = parseIcalDate(a._checkinRaw!);
   const aEnd   = parseIcalDate(a._checkoutRaw!);
@@ -183,7 +163,7 @@ function resolveCrossSourceOverlaps(bookings: Booking[]): Booking[] {
 export async function fetchFeed(
   feed: FeedConfig,
   firstCheckins: Record<string, string>,
-): Promise<{ bookings: Booking[]; syncBlocks: SyncBlock[] }> {
+): Promise<{ bookings: Booking[] }> {
   const today = todayUTC();
   try {
     const res = await fetch(feed.url, {
@@ -198,14 +178,10 @@ export async function fetchFeed(
       .map((e) => normalizeEvent(feed, e.uid, e.dtstart, e.dtend, e.summary ?? "", today, firstCheckins))
       .filter((b): b is Booking => b !== null);
 
-    const syncBlocks = events
-      .map((e) => extractAirbnbSyncBlock(feed, e.dtstart, e.dtend, e.summary ?? ""))
-      .filter((s): s is SyncBlock => s !== null);
-
-    return { bookings, syncBlocks };
+    return { bookings };
   } catch (err) {
     console.warn(`[iCal] Failed to fetch ${feed.apartment} (${feed.source}):`, err);
-    return { bookings: [], syncBlocks: [] };
+    return { bookings: [] };
   }
 }
 
@@ -225,7 +201,6 @@ export async function fetchAllBookings(
   const errors:   string[]  = [];
   const seen = new Set<string>();
   const seenStableKeys = new Set<string>();
-  const allSyncBlocks: SyncBlock[] = [];
 
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
@@ -233,7 +208,6 @@ export async function fetchAllBookings(
       errors.push(`${feeds[i].apartment} (${feeds[i].source}): ${r.reason}`);
       continue;
     }
-    allSyncBlocks.push(...r.value.syncBlocks);
     for (const b of r.value.bookings) {
       const key = `${b.apartment}::${b._checkinRaw}::${b.source}`;
       if (seen.has(key)) continue;
@@ -243,34 +217,13 @@ export async function fetchAllBookings(
     }
   }
 
-  /* ── 1. Kereszt-forrás ütközés-feloldás ELŐSZÖR ── */
+  /* ── 1. Kereszt-forrás ütközés-feloldás: csak VALÓDI foglalásokat
+   *      (más forrásból származó, tényleges "Reserved" eseményeket)
+   *      hasonlítunk össze egymással. Az Airbnb "(Not available)"
+   *      puffer-blokkjait (amik szándékosan szélesebbek egy takarítási/
+   *      átfordulási nappal) NEM vetjük össze a foglalásokkal — azok
+   *      nem jeleznek valódi ütközést, csak zajt okoznának. ── */
   bookings = resolveCrossSourceOverlaps(bookings);
-
-  /* ── 1b. Airbnb szinkron-blokkok: csak jelzésre, a kijelzést nem
-     *      írják felül. Ha egy megjelenő foglalás dátuma eltér egy
-     *      Airbnb "(Not available)" blokk dátumától ugyanarra az
-     *      apartmanra, "Eltérő dátum" jelzést kap, de a forrás és a
-     *      dátumok maguk a megbízható forrásé (pl. Szállás.hu) maradnak. ── */
-  for (const b of bookings) {
-    if (b.hasSourceConflict) continue;
-    const bCheckin  = parseIcalDate(b._checkinRaw!);
-    const bCheckout = parseIcalDate(b._checkoutRaw!);
-    for (const s of allSyncBlocks) {
-      if (s.apartment !== b.apartment) continue;
-      const overlaps = bCheckin < s.checkout && s.checkin < bCheckout;
-      if (!overlaps) continue;
-      // Legfeljebb 1 napos eltérést megengedünk (pl. takarítási/átfordulási
-      // nap az Airbnb blokkjában) — csak az ennél nagyobb eltérést jelezzük.
-      const DAY_MS = 86_400_000;
-      const checkinDiffDays  = Math.abs(bCheckin.getTime()  - s.checkin.getTime())  / DAY_MS;
-      const checkoutDiffDays = Math.abs(bCheckout.getTime() - s.checkout.getTime()) / DAY_MS;
-      const withinTolerance = checkinDiffDays <= 1 && checkoutDiffDays <= 1;
-      if (!withinTolerance) {
-        b.hasSourceConflict = true;
-        break;
-      }
-    }
-  }
 
   /* ── 2. Konfliktust jelző apartmanok listája ── */
   const conflictedApartments = new Set(
