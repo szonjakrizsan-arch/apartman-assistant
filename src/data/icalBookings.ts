@@ -55,11 +55,15 @@ function normalizeEvent(
   if (feed.source === "szallas" && !isKnownBooking && !isArrivingToday) return null;
   if (feed.source === "szallas" && !isKnownBooking && !isArrivingToday) return null;
 
-  // Bármely forrásnál (Airbnb, Szállás.hu stb.) előforduló "(Not available)"
-  // blokkok kiszűrése — ezek letiltott/szinkronizált naptár-blokkok,
-  // NEM valódi vendégfoglalások (ezt Szállás.hu-nál is megfigyeltük,
-  // nem csak Airbnb-nél).
-  if (summary.toLowerCase().includes("not available")) {
+  // Airbnb "(Not available)" blokkok kiszűrése — ezek letiltott/
+  // szinkronizált naptár-blokkok, NEM valódi vendégfoglalások.
+  // FONTOS: ez KIZÁRÓLAG Airbnb-nél biztos (ott jellemzően irreálisan
+  // hosszú, pl. több hónapos "blokkokként" jelennek meg). Szállás.hu-nál
+  // megfigyeltük, hogy a "(Not available)" szöveg valódi, normál hosszúságú
+  // (2-3 éjszakás) vendégfoglalásoknál is előfordulhat egyedi foglalási
+  // azonosítóval — ott ezt a szűrést NEM szabad alkalmazni, mert valódi
+  // foglalásokat tüntetne el.
+  if (feed.source === "airbnb" && summary.toLowerCase().includes("not available")) {
     return null;
   }
   if (nights <= 0) return null;
@@ -312,10 +316,11 @@ export async function fetchFutureBookings(feeds: FeedConfig[]): Promise<import("
     for (const e of r.value) {
       const feed = feeds[i];
 
-      // Bármely forrásnál (Airbnb, Szállás.hu stb.) előforduló "(Not available)"
-      // blokkok kiszűrése — ezek letiltott/szinkronizált naptár-blokkok,
-      // NEM valódi vendégfoglalások.
-      if ((e.summary ?? "").toLowerCase().includes("not available")) {
+      // Airbnb "(Not available)" blokkok kiszűrése — ezek letiltott/
+      // szinkronizált naptár-blokkok, NEM valódi vendégfoglalások.
+      // (Csak Airbnb-nél — Szállás.hu-nál ez a szöveg valódi foglalásokon
+      // is előfordulhat, lásd normalizeEvent() megjegyzését.)
+      if (feed.source === "airbnb" && (e.summary ?? "").toLowerCase().includes("not available")) {
         continue;
       }
 
