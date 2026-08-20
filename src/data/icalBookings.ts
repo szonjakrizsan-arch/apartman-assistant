@@ -55,9 +55,11 @@ function normalizeEvent(
   if (feed.source === "szallas" && !isKnownBooking && !isArrivingToday) return null;
   if (feed.source === "szallas" && !isKnownBooking && !isArrivingToday) return null;
 
-  // ÚJ: Airbnb "(Not available)" blokkok kiszűrése — ezek letiltott/
-  // szinkronizált naptár-blokkok, NEM valódi vendégfoglalások.
-  if (feed.source === "airbnb" && summary.toLowerCase().includes("not available")) {
+  // Bármely forrásnál (Airbnb, Szállás.hu stb.) előforduló "(Not available)"
+  // blokkok kiszűrése — ezek letiltott/szinkronizált naptár-blokkok,
+  // NEM valódi vendégfoglalások (ezt Szállás.hu-nál is megfigyeltük,
+  // nem csak Airbnb-nél).
+  if (summary.toLowerCase().includes("not available")) {
     return null;
   }
   if (nights <= 0) return null;
@@ -310,10 +312,10 @@ export async function fetchFutureBookings(feeds: FeedConfig[]): Promise<import("
     for (const e of r.value) {
       const feed = feeds[i];
 
-      // Airbnb "(Not available)" blokkok kiszűrése — ezek letiltott/
-      // szinkronizált naptár-blokkok, NEM valódi vendégfoglalások.
-      // (Ugyanaz a szűrés, mint a normalizeEvent()-ben a mai foglalásoknál.)
-      if (feed.source === "airbnb" && (e.summary ?? "").toLowerCase().includes("not available")) {
+      // Bármely forrásnál (Airbnb, Szállás.hu stb.) előforduló "(Not available)"
+      // blokkok kiszűrése — ezek letiltott/szinkronizált naptár-blokkok,
+      // NEM valódi vendégfoglalások.
+      if ((e.summary ?? "").toLowerCase().includes("not available")) {
         continue;
       }
 
