@@ -54,6 +54,9 @@ async function load() {
   }
 
   async function deleteApartment(id: string) {
+    // Előbb a hozzá tartozó iCal-feedeket töröljük, hogy ne maradjanak
+    // "árva" feed-sorok egy már nem létező apartmanra mutatva.
+    await supabase.from("ical_feeds").delete().eq("apartment_id", id);
     await supabase.from("apartments").delete().eq("id", id);
     await load();
   }
