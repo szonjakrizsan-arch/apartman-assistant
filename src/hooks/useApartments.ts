@@ -7,6 +7,7 @@ export interface ApartmentRow {
   name: string;
   accent: ApartmentAccent;
   is_demo?: boolean;
+  cleaning_token?: string;
 }
 
 const DEMO_FEED_URL = "https://app.apartmanassistant.hu/api/demo-ical";
@@ -31,7 +32,7 @@ async function load() {
  
     const { data: apts } = await supabase
       .from("apartments")
-      .select("id, name, accent, is_demo")
+      .select("id, name, accent, is_demo, cleaning_token")
       .eq("user_id", userId)
       .order("created_at");
 
