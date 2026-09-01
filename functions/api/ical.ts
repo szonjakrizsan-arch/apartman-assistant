@@ -11,6 +11,21 @@ const ALLOWED_ORIGINS = [
   "expedia.com",
   "githubusercontent.com",
   "apartmanassistant.hu",
+  // Channel Manager szolgáltatók (gyakori, saját domainről kiadott iCal-linkek)
+  "smoobu.com",
+  "hostaway.com",
+  "guesty.com",
+  "lodgify.com",
+  "octorate.com",
+  "hostfully.com",
+  "beds24.com",
+  "rentalsunited.com",
+  "channex.io",
+  "hospitable.com",
+  "ownerrez.com",
+  "avantio.com",
+  "myvr.com",
+  "supercontrol.co.uk",
 ];
 
 function isAllowed(url: string): boolean {
